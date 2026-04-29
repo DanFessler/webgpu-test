@@ -8,8 +8,8 @@ import {
   Color,
 } from '../lib/index.ts'
 import type { RenderSurface } from '../lib/index.ts'
-import spriteUrl from '../assets/sprite.gif'
-import idleUrl from '../assets/mech_idle.png'
+import spriteUrl from './assets/sprite.gif'
+import idleUrl from './assets/mech_idle.png'
 
 const GRID_SPACING = 120
 const GRID_COUNT = 15

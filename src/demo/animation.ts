@@ -7,8 +7,8 @@ import {
   SamplerState,
 } from "../lib/index.ts";
 import type { RenderSurface } from "../lib/index.ts";
-import idleUrl from "../assets/mech_idle.png";
-import walkUrl from "../assets/mech_walk.png";
+import idleUrl from "./assets/mech_idle.png";
+import walkUrl from "./assets/mech_walk.png";
 
 export const animationDemo: DemoDefinition = {
   label: "Animation",

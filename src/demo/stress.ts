@@ -7,7 +7,7 @@ import {
   Color,
 } from '../lib/index.ts'
 import type { RenderSurface, DrawOptions } from '../lib/index.ts'
-import spriteUrl from '../assets/sprite.gif'
+import spriteUrl from './assets/sprite.gif'
 
 const SEED = 12345
 

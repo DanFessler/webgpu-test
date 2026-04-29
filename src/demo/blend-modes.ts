@@ -8,7 +8,7 @@ import {
   Color,
 } from '../lib/index.ts'
 import type { BlendStateDescriptor, RenderSurface } from '../lib/index.ts'
-import spriteUrl from '../assets/sprite.gif'
+import spriteUrl from './assets/sprite.gif'
 
 export const blendDemo: DemoDefinition = {
   label: 'Blend Modes',

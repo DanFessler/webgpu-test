@@ -7,7 +7,7 @@ import {
   Color,
 } from '../lib/index.ts'
 import type { RenderSurface } from '../lib/index.ts'
-import spriteUrl from '../assets/sprite.gif'
+import spriteUrl from './assets/sprite.gif'
 
 export const basicDemo: DemoDefinition = {
   label: 'Basic Drawing',

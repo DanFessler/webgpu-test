@@ -8,9 +8,9 @@ import {
   Camera2D,
 } from "../lib/index.ts";
 import type { RenderSurface } from "../lib/index.ts";
-import tilesUrl from "../assets/goldtiles.png";
-import idleUrl from "../assets/mech_idle.png";
-import walkUrl from "../assets/mech_walk.png";
+import tilesUrl from "./assets/goldtiles.png";
+import idleUrl from "./assets/mech_idle.png";
+import walkUrl from "./assets/mech_walk.png";
 import {
   MAP_WIDTH,
   MAP_HEIGHT,

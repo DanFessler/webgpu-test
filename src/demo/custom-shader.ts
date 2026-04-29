@@ -7,7 +7,7 @@ import {
   Color,
 } from '../lib/index.ts'
 import type { RenderSurface, SpriteEffectDescriptor } from '../lib/index.ts'
-import spriteUrl from '../assets/sprite.gif'
+import spriteUrl from './assets/sprite.gif'
 
 const FRAG_GRAYSCALE = /* wgsl */ `
 @fragment
