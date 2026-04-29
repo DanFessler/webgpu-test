@@ -1,0 +1,51 @@
+{
+  "name": "webgpu-spritebatch",
+  "version": "0.1.0",
+  "description": "XNA-inspired WebGPU SpriteBatch library for high-performance 2D sprite rendering on the web",
+  "type": "module",
+  "main": "./dist-lib/spritebatch.js",
+  "module": "./dist-lib/spritebatch.js",
+  "types": "./dist-lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist-lib/spritebatch.js",
+      "types": "./dist-lib/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist-lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:lib": "vite build --mode lib && tsc -p tsconfig.lib.json",
+    "build:all": "npm run build:lib && npm run build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "webgpu",
+    "spritebatch",
+    "sprites",
+    "2d",
+    "xna",
+    "gamedev",
+    "rendering"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@webgpu/types": "^0.1.69",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.10"
+  },
+  "peerDependencies": {
+    "@webgpu/types": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@webgpu/types": {
+      "optional": true
+    }
+  }
+}
