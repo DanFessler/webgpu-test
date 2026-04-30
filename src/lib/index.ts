@@ -9,8 +9,8 @@ export type {
   SpriteSortMode,
 } from './states.ts'
 
-export { SpriteEffect, buildShaderSource } from './SpriteEffect.ts'
-export type { SpriteEffectDescriptor } from './SpriteEffect.ts'
+export { SpriteEffect, buildShaderSource, buildParamsDescriptor, packParams } from './SpriteEffect.ts'
+export type { SpriteEffectDescriptor, ParamType, ParamDef, EffectParamsDescriptor } from './SpriteEffect.ts'
 
 export { Texture2D } from './Texture2D.ts'
 export { RenderSurface } from './RenderSurface.ts'

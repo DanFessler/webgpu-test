@@ -9,46 +9,15 @@ import {
 } from '../lib/index.ts'
 import type { RenderSurface, SpriteEffectDescriptor } from '../lib/index.ts'
 import spriteUrl from './assets/sprite.gif'
-
-const FRAG_INVERT = /* wgsl */ `
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-  let t = textureSample(sprite_tex, sprite_sampler, in.uv);
-  return vec4f(1.0 - t.rgb, t.a) * in.color;
-}
-`
-
-const FRAG_CRT = /* wgsl */ `
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-  var uv = in.uv;
-  let center = uv - 0.5;
-  let r2 = dot(center, center);
-  uv = uv + center * r2 * 0.3;
-
-  let edge = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
-  let t = textureSample(sprite_tex, sprite_sampler, uv);
-  let scanline = 0.85 + 0.15 * sin(uv.y * screen.size.y * 3.14159);
-  let vignette = 1.0 - r2 * 2.5;
-  return vec4f(t.rgb * scanline * vignette * edge, t.a * edge) * in.color;
-}
-`
-
-const FRAG_PIXELATE = /* wgsl */ `
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-  let pixels = 120.0;
-  let uv = floor(in.uv * pixels) / pixels;
-  let t = textureSample(sprite_tex, sprite_sampler, uv);
-  return t * in.color;
-}
-`
+import { invertEffect } from './shaders/invert.ts'
+import { crtEffect } from './shaders/crt.ts'
+import { pixelateEffect } from './shaders/pixelate.ts'
 
 const postEffects: { effect: SpriteEffectDescriptor; label: string }[] = [
   { effect: SpriteEffect.defaultTextured, label: 'None' },
-  { effect: SpriteEffect.custom('invert', FRAG_INVERT), label: 'Invert' },
-  { effect: SpriteEffect.custom('crt', FRAG_CRT), label: 'CRT' },
-  { effect: SpriteEffect.custom('pixelate', FRAG_PIXELATE), label: 'Pixelate' },
+  { effect: invertEffect, label: 'Invert' },
+  { effect: crtEffect, label: 'CRT' },
+  { effect: pixelateEffect, label: 'Pixelate' },
 ]
 
 export const renderTextureDemo: DemoDefinition = {

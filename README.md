@@ -137,6 +137,7 @@ const batch = new SpriteBatch(surface, { maxSprites: 10_000 })
 | `blendState` | `BlendStateDescriptor` | `BlendState.alphaBlend` | GPU blend mode |
 | `samplerState` | `SamplerStateDescriptor` | `SamplerState.linearClamp` | Texture filtering/wrapping |
 | `effect` | `SpriteEffectDescriptor` | `SpriteEffect.defaultTextured` | Shader effect |
+| `effectParams` | `Record<string, number \| number[]>` | — | Custom shader parameter values (keys must match the effect's `params` schema) |
 | `transformMatrix` | `Float32Array` | identity | 4×4 column-major transform (use `Camera2D.getTransformMatrix()`) |
 | `time` | `number` | `0` | Elapsed time, accessible in custom shaders as `screen.size.z` |
 | `target` | `RenderDestination` | surface | Render destination — pass a `RenderTexture2D` for offscreen rendering |
@@ -269,6 +270,67 @@ Your fragment shader is concatenated after the built-in preamble. Available glob
 | `screen.transform` | `mat4x4f` | The current transform matrix |
 
 Your entry point must be `fn fs_main(in: VertexOutput) -> @location(0) vec4f`.
+
+#### Custom shader parameters
+
+Effects can declare named parameters that are passed as a uniform buffer at `@group(1) @binding(0)`. Define a schema with default values when creating the effect:
+
+```ts
+const crt = SpriteEffect.custom('crt', /* wgsl */ `
+  @fragment
+  fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+    var uv = in.uv;
+    let center = uv - 0.5;
+    let r2 = dot(center, center);
+    uv = uv + center * r2 * params.distortion;
+    let t = textureSample(sprite_tex, sprite_sampler, uv);
+    let scan = (1.0 - params.scanline_intensity)
+             + params.scanline_intensity * sin(uv.y * screen.size.y * 3.14159);
+    return vec4f(t.rgb * scan, t.a) * in.color;
+  }
+`, {
+  params: {
+    distortion: { type: 'f32', default: 0.3 },
+    scanline_intensity: { type: 'f32', default: 0.15 },
+  },
+})
+
+// Uses defaults -- no need to pass params:
+batch.begin({ effect: crt })
+
+// Override specific values for this batch:
+batch.begin({ effect: crt, effectParams: { distortion: 0.8 } })
+```
+
+Each param can be a bare type string (`'f32'`) or an object with `type` and `default`. The library generates the WGSL struct and `@group(1)` binding declaration automatically. Your shader just references `params.<field>`.
+
+Supported types:
+
+| ParamType | JS value type | WGSL size / align |
+|---|---|---|
+| `'f32'` | `number` | 4 / 4 |
+| `'vec2f'` | `[number, number]` | 8 / 8 |
+| `'vec3f'` | `[number, number, number]` | 12 / 16 |
+| `'vec4f'` | `[number, number, number, number]` | 16 / 16 |
+
+Effects without `params` work exactly as before.
+
+#### Effect variants
+
+Create a new effect with different defaults using `SpriteEffect.variant()`:
+
+```ts
+const subtleCrt = SpriteEffect.variant(crt, {
+  distortion: 0.1,
+  scanline_intensity: 0.05,
+})
+
+batch.begin({ effect: subtleCrt })
+```
+
+The variant shares the same shader and pipeline -- only the default param values differ.
+
+#### Depth prepass with custom shaders
 
 For depth prepass with custom shaders, provide a `depthFragmentWgsl` with entry point `fn fs_depth(in: VertexOutput)`:
 

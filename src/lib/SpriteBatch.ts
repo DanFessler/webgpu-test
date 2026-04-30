@@ -10,7 +10,7 @@ import type {
 } from './states.ts'
 import { BlendState, SamplerState } from './states.ts'
 import type { SpriteEffectDescriptor } from './SpriteEffect.ts'
-import { SpriteEffect, buildDepthShaderSource, buildShaderSource } from './SpriteEffect.ts'
+import { SpriteEffect, buildDepthShaderSource, buildShaderSource, packParams } from './SpriteEffect.ts'
 import type { Texture2D } from './Texture2D.ts'
 
 const INSTANCE_FLOATS = 16
@@ -33,6 +33,7 @@ export interface BeginOptions {
   blendState?: BlendStateDescriptor
   samplerState?: SamplerStateDescriptor
   effect?: SpriteEffectDescriptor
+  effectParams?: Record<string, number | number[]>
   transformMatrix?: Float32Array
   time?: number
   target?: RenderDestination
@@ -82,11 +83,17 @@ export class SpriteBatch {
   private readonly _depthKeys: Float32Array
 
   private readonly _bindGroupLayout: GPUBindGroupLayout
+  private readonly _paramsBindGroupLayout: GPUBindGroupLayout
   private readonly _pipelineLayout: GPUPipelineLayout
   private readonly _pipelineCache = new Map<string, GPURenderPipeline>()
   private readonly _shaderCache = new Map<string, GPUShaderModule>()
   private readonly _samplerCache = new Map<string, GPUSampler>()
   private readonly _uniformData = new Float32Array(20)
+
+  private readonly _dummyParamsBuffer: GPUBuffer
+  private readonly _dummyParamsBindGroup: GPUBindGroup
+  private readonly _paramsBuffer: GPUBuffer
+  private readonly _paramsData = new Float32Array(64)
 
   private _begun = false
   private _spriteCount = 0
@@ -100,6 +107,7 @@ export class SpriteBatch {
   private _time = 0
   private _transform: Float32Array | null = null
   private _target: RenderDestination
+  private _effectParams: Record<string, number | number[]> | null = null
 
   constructor(surface: RenderSurface, options?: { maxSprites?: number }) {
     this._surface = surface
@@ -156,9 +164,32 @@ export class SpriteBatch {
       ],
     })
 
+    this._paramsBindGroupLayout = this._gpu.createBindGroupLayout({
+      label: 'sb-params-bgl',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      ],
+    })
+
     this._pipelineLayout = this._gpu.createPipelineLayout({
       label: 'sb-pl',
-      bindGroupLayouts: [this._bindGroupLayout],
+      bindGroupLayouts: [this._bindGroupLayout, this._paramsBindGroupLayout],
+    })
+
+    this._dummyParamsBuffer = this._gpu.createBuffer({
+      label: 'sb-params-dummy',
+      size: 16,
+      usage: GPUBufferUsage.UNIFORM,
+    })
+    this._dummyParamsBindGroup = this._gpu.createBindGroup({
+      layout: this._paramsBindGroupLayout,
+      entries: [{ binding: 0, resource: { buffer: this._dummyParamsBuffer } }],
+    })
+
+    this._paramsBuffer = this._gpu.createBuffer({
+      label: 'sb-params',
+      size: 256,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     })
   }
 
@@ -180,6 +211,7 @@ export class SpriteBatch {
     this._time = options?.time ?? 0
     this._transform = options?.transformMatrix ?? null
     this._target = options?.target ?? this._surface
+    this._effectParams = options?.effectParams ?? null
   }
 
   draw(texture: Texture2D, options?: DrawOptions): void {
@@ -315,10 +347,24 @@ export class SpriteBatch {
 
     this._bufferOffset += count
 
+    const effect = this._effect
+
+    let paramsBindGroup = this._dummyParamsBindGroup
+    if (effect.params) {
+      const merged = this._effectParams
+        ? { ...effect.params.defaults, ...this._effectParams }
+        : effect.params.defaults
+      const packed = packParams(effect.params, merged, this._paramsData)
+      this._gpu.queue.writeBuffer(this._paramsBuffer, 0, packed.buffer, packed.byteOffset, effect.params.size)
+      paramsBindGroup = this._gpu.createBindGroup({
+        layout: this._paramsBindGroupLayout,
+        entries: [{ binding: 0, resource: { buffer: this._paramsBuffer, size: effect.params.size } }],
+      })
+    }
+
     const sampler = this._getOrCreateSampler(this._sampler)
     const groups = this._findTextureGroups(texArray, count)
     const encoder = this._target.commandEncoder
-    const effect = this._effect
 
     if (effect.depthPrepass) {
       const depthPipeline = this._getOrCreatePipeline(true)
@@ -331,7 +377,7 @@ export class SpriteBatch {
           depthStoreOp: 'store',
         },
       })
-      this._encodeGroups(pass, depthPipeline, sampler, groups, texArray, baseOffset, uniformOffset)
+      this._encodeGroups(pass, depthPipeline, sampler, groups, texArray, baseOffset, uniformOffset, paramsBindGroup)
       pass.end()
     }
 
@@ -350,7 +396,7 @@ export class SpriteBatch {
           }
         : {}),
     })
-    this._encodeGroups(colorPass, colorPipeline, sampler, groups, texArray, baseOffset, uniformOffset)
+    this._encodeGroups(colorPass, colorPipeline, sampler, groups, texArray, baseOffset, uniformOffset, paramsBindGroup)
     colorPass.end()
   }
 
@@ -456,11 +502,13 @@ export class SpriteBatch {
     textures: (Texture2D | null)[],
     instanceOffset: number,
     uniformOffset: number,
+    paramsBindGroup: GPUBindGroup,
   ): void {
     pass.setPipeline(pipeline)
     pass.setVertexBuffer(0, this._quadVB)
     pass.setVertexBuffer(1, this._instanceBuffer)
     pass.setIndexBuffer(this._quadIB, 'uint16')
+    pass.setBindGroup(1, paramsBindGroup)
 
     for (const g of groups) {
       const bg = this._gpu.createBindGroup({

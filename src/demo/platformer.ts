@@ -8,6 +8,7 @@ import {
   SamplerState,
   Camera2D,
 } from "../lib/index.ts";
+import { crtEffect } from "./shaders/crt.ts";
 import type { RenderSurface } from "../lib/index.ts";
 import tilesUrl from "./assets/goldtiles.png";
 import idleUrl from "./assets/mech_idle.png";
@@ -19,22 +20,6 @@ import {
   TILESET_COLUMNS,
   MAP_LAYERS,
 } from "./platformer-map.ts";
-
-const FRAG_CRT = /* wgsl */ `
-@fragment
-fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-  var uv = in.uv;
-  let center = uv - 0.5;
-  let r2 = dot(center, center);
-  uv = uv + center * r2 * 0.3;
-
-  let edge = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
-  let t = textureSample(sprite_tex, sprite_sampler, uv);
-  let scanline = 0.85 + 0.15 * sin(uv.y * (screen.size.y/2) * 3.14159);
-  let vignette = 1.0 - r2 * 2.5;
-  return vec4f(t.rgb * scanline * vignette * edge, t.a * edge) * in.color;
-}
-`;
 
 const GRAVITY = 900;
 const JUMP_FORCE = 390;
@@ -69,7 +54,8 @@ export const platformerDemo: DemoDefinition = {
     const cam = new Camera2D();
     cam.zoom = 3;
 
-    const crtEffect = SpriteEffect.custom("crt", FRAG_CRT);
+    const TEAR_SPEED = 0.08;
+    const TEAR_STRENGTH = 0.01;
     const scene = RenderTexture2D.create(surface, {
       width: surface.physicalWidth,
       height: surface.physicalHeight,
@@ -118,6 +104,8 @@ export const platformerDemo: DemoDefinition = {
       frame(elapsed: number) {
         const dt = Math.min(elapsed - lastElapsed, 0.05);
         lastElapsed = elapsed;
+
+        const tearY = ((elapsed * TEAR_SPEED) % 1.2) - 0.1;
 
         // Input
         player.vx = 0;
@@ -263,6 +251,7 @@ export const platformerDemo: DemoDefinition = {
         batch.begin({
           sortMode: "deferred",
           effect: crtEffect,
+          effectParams: { tear_offset: [tearY, TEAR_STRENGTH] },
           samplerState: SamplerState.linearClamp,
         });
         batch.draw(scene.texture, {
