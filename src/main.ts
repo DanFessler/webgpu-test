@@ -2,6 +2,7 @@ import './style.css'
 import { RenderSurface } from './lib/index.ts'
 import type { DemoDefinition, DemoInstance } from './demo/types.ts'
 import { stressDemo } from './demo/stress.ts'
+import { bunnyMarkDemo } from './demo/bunnymark.ts'
 import { basicDemo } from './demo/basic.ts'
 import { customShaderDemo } from './demo/custom-shader.ts'
 import { sortingDemo } from './demo/sorting.ts'
@@ -15,7 +16,9 @@ const playStopBtn = document.querySelector<HTMLButtonElement>('#play-stop')!
 const demoSelect = document.querySelector<HTMLSelectElement>('#demo-select')!
 const statsEl = document.querySelector<HTMLSpanElement>('#stats')!
 
-const DEMOS: DemoDefinition[] = [stressDemo, basicDemo, customShaderDemo, sortingDemo, blendDemo, animationDemo, cameraDemo, platformerDemo]
+const DEFAULT_CLEAR_COLOR = { r: 0.06, g: 0.07, b: 0.1, a: 1 }
+
+const DEMOS: DemoDefinition[] = [stressDemo, bunnyMarkDemo, basicDemo, customShaderDemo, sortingDemo, blendDemo, animationDemo, cameraDemo, platformerDemo]
 
 for (const d of DEMOS) {
   const opt = document.createElement('option')
@@ -65,10 +68,11 @@ async function run() {
       fpsDisplay = Math.round(fpsFrames / ((now - fpsLast) * 0.001))
       fpsFrames = 0
       fpsLast = now
-      statsEl.textContent = `${fpsDisplay} fps`
+      const demoStats = current?.statsText?.()
+      statsEl.textContent = demoStats ? `${fpsDisplay} fps | ${demoStats}` : `${fpsDisplay} fps`
     }
 
-    surface.beginFrame({ clearColor: { r: 0.06, g: 0.07, b: 0.1, a: 1 } })
+    surface.beginFrame({ clearColor: current?.clearColor ?? DEFAULT_CLEAR_COLOR })
     current?.frame(elapsed)
     surface.endFrame()
 

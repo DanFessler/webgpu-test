@@ -6,6 +6,7 @@ export class RenderSurface {
   readonly canvas: HTMLCanvasElement
   readonly gpuDevice: GPUDevice
   readonly format: GPUTextureFormat
+  maxDevicePixelRatio = 2
 
   private _context: GPUCanvasContext
   private _encoder: GPUCommandEncoder | null = null
@@ -84,7 +85,7 @@ export class RenderSurface {
   }
 
   resize(): void {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const dpr = Math.min(window.devicePixelRatio || 1, this.maxDevicePixelRatio)
     const cw = this.canvas.clientWidth || window.innerWidth
     const ch = this.canvas.clientHeight || window.innerHeight
     const w = Math.max(1, Math.floor(cw * dpr))

@@ -1,6 +1,8 @@
-import type { RenderSurface } from '../lib/index.ts'
+import type { ColorRGBA, RenderSurface } from '../lib/index.ts'
 
 export interface DemoInstance {
+  readonly clearColor?: ColorRGBA
+  readonly statsText?: () => string
   frame(elapsed: number): void
   destroy(): void
 }
