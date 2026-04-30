@@ -11,6 +11,7 @@ Draw thousands of textured, tinted, rotated sprites with a familiar `begin` / `d
 - **Sampler presets** — linear/point × clamp/wrap
 - **Built-in effects** — textured, alpha-cutout (+ depth prepass), solid color
 - **Custom fragment shaders** — plug in any WGSL fragment while keeping the default vertex/instance layout
+- **Render textures** — render sprites into offscreen textures for post-processing, minimaps, or pixel-art virtual resolutions
 - **Camera2D** — pan, zoom, rotate with a transform matrix (XNA-style)
 - **SpriteAnimation** — frame sequencing for spritesheets with loop, once, and ping-pong modes
 - **Pipeline & sampler caching** — create once, reuse every frame
@@ -138,6 +139,7 @@ const batch = new SpriteBatch(surface, { maxSprites: 10_000 })
 | `effect` | `SpriteEffectDescriptor` | `SpriteEffect.defaultTextured` | Shader effect |
 | `transformMatrix` | `Float32Array` | identity | 4×4 column-major transform (use `Camera2D.getTransformMatrix()`) |
 | `time` | `number` | `0` | Elapsed time, accessible in custom shaders as `screen.size.z` |
+| `target` | `RenderDestination` | surface | Render destination — pass a `RenderTexture2D` for offscreen rendering |
 
 #### `DrawOptions`
 
@@ -184,6 +186,50 @@ const white = Texture2D.fromColor(surface, 1, 1, 1)
 | `width` / `height` | Texture dimensions in pixels |
 | `view` | The `GPUTextureView` |
 | `destroy()` | Release the GPU texture |
+
+---
+
+### `RenderTexture2D`
+
+An offscreen render target that can be drawn into and then sampled as a regular texture. Both `RenderSurface` and `RenderTexture2D` implement the `RenderDestination` interface, so `SpriteBatch` (and future renderers) can target either one.
+
+```ts
+import { RenderTexture2D, SpriteBatch, SpriteEffect, Color } from 'webgpu-spritebatch'
+
+const scene = RenderTexture2D.create(surface, { width: 320, height: 180 })
+const batch = new SpriteBatch(surface)
+
+function frame() {
+  surface.beginFrame({ clearColor: Color.black })
+
+  // Draw sprites into the render texture
+  scene.clear({ clearColor: Color.transparent })
+  batch.begin({ target: scene, samplerState: SamplerState.pointClamp })
+  batch.draw(playerTex, { position: [80, 60] })
+  batch.end()
+
+  // Draw the render texture to the screen with a post-process effect
+  batch.begin({ effect: crtEffect })
+  batch.draw(scene.texture, {
+    destinationRect: { x: 0, y: 0, width: surface.width, height: surface.height },
+  })
+  batch.end()
+
+  surface.endFrame()
+}
+```
+
+| Member | Description |
+|---|---|
+| `static create(surface, options)` | Create a render texture with explicit `width` and `height` |
+| `texture` | The underlying `Texture2D` — pass to `batch.draw()` for sampling |
+| `width` / `height` | Texture dimensions in pixels (logical = physical) |
+| `format` | Color texture format (matches the surface) |
+| `colorView` / `depthView` | Render attachment views |
+| `resize(width, height)` | Recreate at a new size |
+| `resizeToSurface(surface?)` | Resize to match the surface's physical dimensions |
+| `clear(options?)` | Clear color and depth (`clearColor` defaults to transparent) |
+| `destroy()` | Release GPU textures |
 
 ---
 
@@ -427,7 +473,7 @@ npm install
 npm run dev        # Vite dev server with interactive demo gallery
 ```
 
-The gallery includes demos for: stress testing, basic drawing, custom shaders, sorting & depth, blend modes, spritesheet animation, and camera controls.
+The gallery includes demos for: stress testing, basic drawing, custom shaders, sorting & depth, blend modes, spritesheet animation, camera controls, and render texture post-processing.
 
 ## Building the Library
 

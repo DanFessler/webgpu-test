@@ -10,6 +10,7 @@ import { blendDemo } from './demo/blend-modes.ts'
 import { animationDemo } from './demo/animation.ts'
 import { cameraDemo } from './demo/camera.ts'
 import { platformerDemo } from './demo/platformer.ts'
+import { renderTextureDemo } from './demo/render-texture.ts'
 
 const canvas = document.querySelector<HTMLCanvasElement>('#canvas')!
 const playStopBtn = document.querySelector<HTMLButtonElement>('#play-stop')!
@@ -18,7 +19,7 @@ const statsEl = document.querySelector<HTMLSpanElement>('#stats')!
 
 const DEFAULT_CLEAR_COLOR = { r: 0.06, g: 0.07, b: 0.1, a: 1 }
 
-const DEMOS: DemoDefinition[] = [stressDemo, bunnyMarkDemo, basicDemo, customShaderDemo, sortingDemo, blendDemo, animationDemo, cameraDemo, platformerDemo]
+const DEMOS: DemoDefinition[] = [stressDemo, bunnyMarkDemo, basicDemo, customShaderDemo, sortingDemo, blendDemo, animationDemo, cameraDemo, platformerDemo, renderTextureDemo]
 
 for (const d of DEMOS) {
   const opt = document.createElement('option')

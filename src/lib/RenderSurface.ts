@@ -1,8 +1,9 @@
+import type { RenderDestination } from './RenderDestination.ts'
 import type { ColorRGBA } from './math.ts'
 
 const DEPTH_FORMAT: GPUTextureFormat = 'depth24plus'
 
-export class RenderSurface {
+export class RenderSurface implements RenderDestination {
   readonly canvas: HTMLCanvasElement
   readonly gpuDevice: GPUDevice
   readonly format: GPUTextureFormat

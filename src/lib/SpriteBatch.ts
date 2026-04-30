@@ -1,4 +1,5 @@
 import type { RenderSurface } from './RenderSurface.ts'
+import type { RenderDestination } from './RenderDestination.ts'
 import type { ColorRGBA, Rect, Vec2 } from './math.ts'
 import { Color } from './math.ts'
 import type {
@@ -34,6 +35,7 @@ export interface BeginOptions {
   effect?: SpriteEffectDescriptor
   transformMatrix?: Float32Array
   time?: number
+  target?: RenderDestination
 }
 
 const VERTEX_BUFFER_LAYOUTS: GPUVertexBufferLayout[] = [
@@ -97,9 +99,11 @@ export class SpriteBatch {
   private _effect: SpriteEffectDescriptor = SpriteEffect.defaultTextured
   private _time = 0
   private _transform: Float32Array | null = null
+  private _target: RenderDestination
 
   constructor(surface: RenderSurface, options?: { maxSprites?: number }) {
     this._surface = surface
+    this._target = surface
     this._gpu = surface.gpuDevice
     this._maxSprites = options?.maxSprites ?? 10_000
 
@@ -175,6 +179,7 @@ export class SpriteBatch {
     this._effect = options?.effect ?? SpriteEffect.defaultTextured
     this._time = options?.time ?? 0
     this._transform = options?.transformMatrix ?? null
+    this._target = options?.target ?? this._surface
   }
 
   draw(texture: Texture2D, options?: DrawOptions): void {
@@ -269,8 +274,8 @@ export class SpriteBatch {
     if (count === 0) return
 
     const ud = this._uniformData
-    ud[0] = this._surface.width
-    ud[1] = this._surface.height
+    ud[0] = this._target.width
+    ud[1] = this._target.height
     ud[2] = this._time
     ud[3] = 0
     if (this._transform) {
@@ -312,7 +317,7 @@ export class SpriteBatch {
 
     const sampler = this._getOrCreateSampler(this._sampler)
     const groups = this._findTextureGroups(texArray, count)
-    const encoder = this._surface.commandEncoder
+    const encoder = this._target.commandEncoder
     const effect = this._effect
 
     if (effect.depthPrepass) {
@@ -320,7 +325,7 @@ export class SpriteBatch {
       const pass = encoder.beginRenderPass({
         colorAttachments: [],
         depthStencilAttachment: {
-          view: this._surface.depthView,
+          view: this._target.depthView,
           depthClearValue: 1,
           depthLoadOp: 'clear',
           depthStoreOp: 'store',
@@ -333,12 +338,12 @@ export class SpriteBatch {
     const colorPipeline = this._getOrCreatePipeline(false)
     const colorPass = encoder.beginRenderPass({
       colorAttachments: [
-        { view: this._surface.colorView, loadOp: 'load', storeOp: 'store' },
+        { view: this._target.colorView, loadOp: 'load', storeOp: 'store' },
       ],
       ...(effect.depthPrepass
         ? {
             depthStencilAttachment: {
-              view: this._surface.depthView,
+              view: this._target.depthView,
               depthLoadOp: 'load',
               depthStoreOp: 'discard',
             },
@@ -474,7 +479,7 @@ export class SpriteBatch {
   private _getOrCreatePipeline(isDepth: boolean): GPURenderPipeline {
     const effect = this._effect
     const blend = this._blend
-    const fmt = this._surface.format
+    const fmt = this._target.format
     const key = `${effect.label}|${isDepth}|${JSON.stringify(blend)}|${fmt}`
 
     let p = this._pipelineCache.get(key)
@@ -487,7 +492,7 @@ export class SpriteBatch {
       this._shaderCache.set(wgsl, mod)
     }
 
-    const depthFmt = this._surface.depthFormat
+    const depthFmt = this._target.depthFormat
 
     let depthStencil: GPUDepthStencilState | undefined
     if (isDepth) {

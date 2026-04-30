@@ -2,6 +2,7 @@ import type { DemoDefinition, DemoInstance } from "./types.ts";
 import {
   SpriteBatch,
   Texture2D,
+  RenderTexture2D,
   SpriteAnimation,
   SpriteEffect,
   SamplerState,
@@ -18,6 +19,22 @@ import {
   TILESET_COLUMNS,
   MAP_LAYERS,
 } from "./platformer-map.ts";
+
+const FRAG_CRT = /* wgsl */ `
+@fragment
+fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+  var uv = in.uv;
+  let center = uv - 0.5;
+  let r2 = dot(center, center);
+  uv = uv + center * r2 * 0.3;
+
+  let edge = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
+  let t = textureSample(sprite_tex, sprite_sampler, uv);
+  let scanline = 0.85 + 0.15 * sin(uv.y * (screen.size.y/2) * 3.14159);
+  let vignette = 1.0 - r2 * 2.5;
+  return vec4f(t.rgb * scanline * vignette * edge, t.a * edge) * in.color;
+}
+`;
 
 const GRAVITY = 900;
 const JUMP_FORCE = 390;
@@ -51,6 +68,13 @@ export const platformerDemo: DemoDefinition = {
 
     const cam = new Camera2D();
     cam.zoom = 3;
+
+    const crtEffect = SpriteEffect.custom("crt", FRAG_CRT);
+    const scene = RenderTexture2D.create(surface, {
+      width: surface.physicalWidth,
+      height: surface.physicalHeight,
+      label: "platformer-scene",
+    });
 
     const player = {
       x: 256,
@@ -168,13 +192,16 @@ export const platformerDemo: DemoDefinition = {
         anim.update(dt);
 
         // Camera
+        scene.resizeToSurface();
         cam.position = [player.x + PLAYER_W / 2, player.y + PLAYER_H / 2];
         cam.origin = [surface.width / 2, surface.height / 2];
 
         const transform = cam.getTransformMatrix();
+        scene.clear({ clearColor: { r: 0.06, g: 0.07, b: 0.1, a: 1 } });
 
-        // Draw tiles
+        // Draw tiles into render texture
         batch.begin({
+          target: scene,
           sortMode: "deferred",
           effect: SpriteEffect.alphaCutout,
           samplerState: SamplerState.pointClamp,
@@ -231,11 +258,28 @@ export const platformerDemo: DemoDefinition = {
         });
 
         batch.end();
+
+        // Composite render texture to screen with CRT effect
+        batch.begin({
+          sortMode: "deferred",
+          effect: crtEffect,
+          samplerState: SamplerState.linearClamp,
+        });
+        batch.draw(scene.texture, {
+          destinationRect: {
+            x: 0,
+            y: 0,
+            width: surface.width,
+            height: surface.height,
+          },
+        });
+        batch.end();
       },
 
       destroy() {
         window.removeEventListener("keydown", onKey);
         window.removeEventListener("keyup", onKey);
+        scene.destroy();
         tilesTex.destroy();
         idleTex.destroy();
         walkTex.destroy();

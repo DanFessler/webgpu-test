@@ -14,6 +14,9 @@ export type { SpriteEffectDescriptor } from './SpriteEffect.ts'
 
 export { Texture2D } from './Texture2D.ts'
 export { RenderSurface } from './RenderSurface.ts'
+export { RenderTexture2D } from './RenderTexture2D.ts'
+export type { RenderTextureOptions } from './RenderTexture2D.ts'
+export type { RenderDestination } from './RenderDestination.ts'
 export { SpriteBatch } from './SpriteBatch.ts'
 export type { BeginOptions, DrawOptions } from './SpriteBatch.ts'
 
