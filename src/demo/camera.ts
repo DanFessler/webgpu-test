@@ -28,18 +28,25 @@ export const cameraDemo: DemoDefinition = {
 
     let keys = new Set<string>()
     const onKey = (e: KeyboardEvent) => {
+      if (document.activeElement !== surface.canvas) return
+      if (['w', 'a', 's', 'd', 'q', 'e', 'r', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', '=', '+', '-'].includes(e.key.toLowerCase())) {
+        e.preventDefault()
+      }
       if (e.type === 'keydown') keys.add(e.key.toLowerCase())
       else keys.delete(e.key.toLowerCase())
     }
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup', onKey)
+    const clearKeys = () => keys.clear()
+    surface.canvas.addEventListener('blur', clearKeys)
 
     let wheelZoom = 0
     const onWheel = (e: WheelEvent) => {
+      if (document.activeElement !== surface.canvas) return
       e.preventDefault()
       wheelZoom -= e.deltaY * 0.001
     }
-    window.addEventListener('wheel', onWheel, { passive: false })
+    surface.canvas.addEventListener('wheel', onWheel, { passive: false })
 
     let lastElapsed = 0
 
@@ -120,7 +127,8 @@ export const cameraDemo: DemoDefinition = {
       destroy() {
         window.removeEventListener('keydown', onKey)
         window.removeEventListener('keyup', onKey)
-        window.removeEventListener('wheel', onWheel)
+        surface.canvas.removeEventListener('blur', clearKeys)
+        surface.canvas.removeEventListener('wheel', onWheel)
         tex.destroy()
         mechTex.destroy()
         white.destroy()

@@ -25,23 +25,13 @@ export const blendDemo: DemoDefinition = {
       { blend: BlendState.premultipliedAlpha, label: 'Premultiplied' },
     ]
 
-    const infoEl = document.createElement('div')
-    infoEl.id = 'demo-info'
-    infoEl.style.cssText =
-      'position:fixed;bottom:16px;left:16px;color:#fff;font:600 14px/1.4 system-ui,sans-serif;' +
-      'background:rgb(8 10 16/72%);padding:8px 14px;border-radius:8px;backdrop-filter:blur(8px);z-index:2;'
-    document.body.appendChild(infoEl)
-
     return {
       frame(elapsed: number) {
         const cols = modes.length
         const spacing = surface.width / (cols + 1)
 
-        const labels: string[] = []
-
         for (let i = 0; i < cols; i++) {
-          const { blend, label } = modes[i]
-          labels.push(label)
+          const { blend } = modes[i]
 
           batch.begin({
             sortMode: 'deferred',
@@ -74,12 +64,9 @@ export const blendDemo: DemoDefinition = {
 
           batch.end()
         }
-
-        infoEl.textContent = labels.join('  ·  ')
       },
 
       destroy() {
-        infoEl.remove()
         texture.destroy()
       },
     }

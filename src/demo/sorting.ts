@@ -21,20 +21,16 @@ export const sortingDemo: DemoDefinition = {
     let modeIdx = 0
 
     const onKey = (e: KeyboardEvent) => {
+      if (document.activeElement !== surface.canvas) return
       if (e.key === ' ' || e.key === 'ArrowRight') {
+        e.preventDefault()
         modeIdx = (modeIdx + 1) % modes.length
       } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
         modeIdx = (modeIdx - 1 + modes.length) % modes.length
       }
     }
     window.addEventListener('keydown', onKey)
-
-    const infoEl = document.createElement('div')
-    infoEl.id = 'demo-info'
-    infoEl.style.cssText =
-      'position:fixed;bottom:16px;left:16px;color:#fff;font:600 14px/1.4 system-ui,sans-serif;' +
-      'background:rgb(8 10 16/72%);padding:8px 14px;border-radius:8px;backdrop-filter:blur(8px);z-index:2;'
-    document.body.appendChild(infoEl)
 
     const SPRITE_COUNT = 12
     const COLORS = [
@@ -46,18 +42,11 @@ export const sortingDemo: DemoDefinition = {
     ]
 
     return {
+      statsText: () => `sort: ${modes[modeIdx]}`,
+
       frame(elapsed: number) {
         const mode = modes[modeIdx]
         const useCutout = mode === 'frontToBack'
-
-        const modeDesc = {
-          deferred: 'Draw order = submission order (no sort)',
-          frontToBack: 'Low depth drawn first + depth test (closest wins)',
-          backToFront: 'High depth drawn first (painter\'s algorithm)',
-          texture: 'Grouped by texture ID (perf optimization)',
-        }[mode]
-
-        infoEl.textContent = `Sort: ${mode} — ${modeDesc}  (space to cycle)`
 
         batch.begin({
           sortMode: mode,
@@ -98,7 +87,6 @@ export const sortingDemo: DemoDefinition = {
 
       destroy() {
         window.removeEventListener('keydown', onKey)
-        infoEl.remove()
         texture.destroy()
       },
     }

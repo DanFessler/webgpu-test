@@ -12,8 +12,6 @@ import bunnySheetUrl from "./assets/bunnys.png";
 const START_BUNNIES = 2;
 const MAX_BUNNIES = 200_000;
 const ADD_PER_FRAME = 100;
-const STAGE_WIDTH = 800;
-const STAGE_HEIGHT = 600;
 const BUNNY_WIDTH = 26;
 const BUNNY_HEIGHT = 37;
 const BUNNY_SHEET_MARGIN = 2;
@@ -39,17 +37,13 @@ const SOURCE_RECTS: Rect[] = [1, 2, 3, 4, 0].map((row) => ({
 }));
 
 export const bunnyMarkDemo: DemoDefinition = {
-  label: "BunnyMark 1:1",
+  label: "BunnyMark",
   maxSprites: MAX_BUNNIES,
 
   async setup(surface: RenderSurface): Promise<DemoInstance> {
     const previousMaxDpr = surface.maxDevicePixelRatio;
-    const previousWidth = surface.canvas.style.width;
-    const previousHeight = surface.canvas.style.height;
 
     surface.maxDevicePixelRatio = 1;
-    surface.canvas.style.width = `${STAGE_WIDTH}px`;
-    surface.canvas.style.height = `${STAGE_HEIGHT}px`;
 
     const batch = new SpriteBatch(surface, { maxSprites: MAX_BUNNIES });
     const texture = await Texture2D.fromUrl(surface, bunnySheetUrl);
@@ -121,6 +115,8 @@ export const bunnyMarkDemo: DemoDefinition = {
 
       frame() {
         if (isAdding) addBunnies(ADD_PER_FRAME);
+        const stageWidth = surface.width;
+        const stageHeight = surface.height;
 
         batch.begin({
           sortMode: "deferred",
@@ -135,17 +131,17 @@ export const bunnyMarkDemo: DemoDefinition = {
           bunny.y += bunny.speedY;
           bunny.speedY += GRAVITY;
 
-          if (bunny.x > STAGE_WIDTH) {
+          if (bunny.x > stageWidth) {
             bunny.speedX *= -1;
-            bunny.x = STAGE_WIDTH;
+            bunny.x = stageWidth;
           } else if (bunny.x < 0) {
             bunny.speedX *= -1;
             bunny.x = 0;
           }
 
-          if (bunny.y > STAGE_HEIGHT) {
+          if (bunny.y > stageHeight) {
             bunny.speedY *= -0.85;
-            bunny.y = STAGE_HEIGHT;
+            bunny.y = stageHeight;
             if (Math.random() > 0.5) bunny.speedY -= Math.random() * 6;
           } else if (bunny.y < 0) {
             bunny.speedY = 0;
@@ -170,8 +166,6 @@ export const bunnyMarkDemo: DemoDefinition = {
         window.removeEventListener("pointerup", stopAdding);
         window.removeEventListener("pointercancel", stopAdding);
         surface.maxDevicePixelRatio = previousMaxDpr;
-        surface.canvas.style.width = previousWidth;
-        surface.canvas.style.height = previousHeight;
       },
     };
   },
