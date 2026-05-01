@@ -52,13 +52,13 @@ export const platformerDemo: DemoDefinition = {
     });
 
     const cam = new Camera2D();
-    cam.zoom = 3;
+    cam.zoom = 2;
 
     const TEAR_SPEED = 0.08;
     const TEAR_STRENGTH = 0.01;
     const scene = RenderTexture2D.create(surface, {
-      width: surface.physicalWidth,
-      height: surface.physicalHeight,
+      width: surface.width,
+      height: surface.height,
       label: "platformer-scene",
     });
 
@@ -73,12 +73,28 @@ export const platformerDemo: DemoDefinition = {
 
     const keys = new Set<string>();
     const onKey = (e: KeyboardEvent) => {
+      if (document.activeElement !== surface.canvas) return;
       const k = e.key.toLowerCase();
+      if (
+        [
+          " ",
+          "w",
+          "a",
+          "d",
+          "arrowup",
+          "arrowleft",
+          "arrowright",
+        ].includes(k)
+      ) {
+        e.preventDefault();
+      }
       if (e.type === "keydown") keys.add(k);
       else keys.delete(k);
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onKey);
+    const clearKeys = () => keys.clear();
+    surface.canvas.addEventListener("blur", clearKeys);
 
     let lastElapsed = 0;
 
@@ -180,7 +196,7 @@ export const platformerDemo: DemoDefinition = {
         anim.update(dt);
 
         // Camera
-        scene.resizeToSurface();
+        scene.resize(surface.width, surface.height);
         cam.position = [player.x + PLAYER_W / 2, player.y + PLAYER_H / 2];
         cam.origin = [surface.width / 2, surface.height / 2];
 
@@ -268,6 +284,7 @@ export const platformerDemo: DemoDefinition = {
       destroy() {
         window.removeEventListener("keydown", onKey);
         window.removeEventListener("keyup", onKey);
+        surface.canvas.removeEventListener("blur", clearKeys);
         scene.destroy();
         tilesTex.destroy();
         idleTex.destroy();
