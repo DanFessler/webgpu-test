@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "XNA-inspired WebGPU SpriteBatch library for high-performance 2D sprite rendering on the web",
   "type": "module",
-  "homepage": "https://danfessler.github.io/webgpu-spritebatch/",
+  "homepage": "https://spritebatch.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DanFessler/webgpu-spritebatch.git"

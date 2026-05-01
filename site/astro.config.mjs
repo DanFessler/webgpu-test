@@ -3,9 +3,8 @@ import starlight from '@astrojs/starlight'
 import { resolve } from 'path'
 
 const root = resolve(import.meta.dirname, '..')
-const githubPages = process.env.GITHUB_PAGES === 'true'
-const site = process.env.SITE_URL ?? (githubPages ? 'https://danfessler.github.io/webgpu-spritebatch/' : undefined)
-const base = process.env.BASE_PATH ?? (githubPages ? '/webgpu-spritebatch' : undefined)
+const site = process.env.SITE_URL ?? 'https://spritebatch.com/'
+const base = process.env.BASE_PATH
 
 export default defineConfig({
   site,
