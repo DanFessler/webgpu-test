@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "XNA-inspired WebGPU SpriteBatch library for high-performance 2D sprite rendering on the web",
   "type": "module",
+  "homepage": "https://danfessler.github.io/webgpu-spritebatch/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanFessler/webgpu-spritebatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DanFessler/webgpu-spritebatch/issues"
+  },
   "main": "./dist-lib/spritebatch.js",
   "module": "./dist-lib/spritebatch.js",
   "types": "./dist-lib/types/index.d.ts",
@@ -26,7 +34,8 @@
     "typecheck": "tsc --noEmit",
     "site:dev": "npm run dev --prefix site",
     "site:build": "npm run build --prefix site",
-    "site:preview": "npm run preview --prefix site"
+    "site:preview": "npm run preview --prefix site",
+    "prepack": "npm run build:lib"
   },
   "keywords": [
     "webgpu",
@@ -38,6 +47,9 @@
     "rendering"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@webgpu/types": "^0.1.69",
     "typescript": "~6.0.2",

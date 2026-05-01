@@ -48,11 +48,11 @@ requestAnimationFrame(frame)
 
 ## Documentation
 
-Full documentation, guides, and API reference are available on the **[documentation site](site/)**.
+Full documentation, guides, and API reference are available on the **[documentation site](https://danfessler.github.io/webgpu-spritebatch/)**.
 
-- [Getting Started](site/src/content/docs/getting-started/introduction.mdx)
-- [API Reference](site/src/content/docs/reference/sprite-batch.mdx)
-- [Live Demos](site/src/pages/demos.astro)
+- [Getting Started](https://danfessler.github.io/webgpu-spritebatch/getting-started/introduction/)
+- [API Reference](https://danfessler.github.io/webgpu-spritebatch/reference/sprite-batch/)
+- [Live Demos](https://danfessler.github.io/webgpu-spritebatch/demos/)
 
 ## Development
 

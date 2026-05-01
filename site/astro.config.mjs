@@ -3,8 +3,13 @@ import starlight from '@astrojs/starlight'
 import { resolve } from 'path'
 
 const root = resolve(import.meta.dirname, '..')
+const githubPages = process.env.GITHUB_PAGES === 'true'
+const site = process.env.SITE_URL ?? (githubPages ? 'https://danfessler.github.io/webgpu-spritebatch/' : undefined)
+const base = process.env.BASE_PATH ?? (githubPages ? '/webgpu-spritebatch' : undefined)
 
 export default defineConfig({
+  site,
+  base,
   vite: {
     resolve: {
       alias: {
@@ -40,7 +45,7 @@ export default defineConfig({
       description:
         'XNA-inspired SpriteBatch for WebGPU — draw thousands of textured, tinted, rotated sprites with a familiar begin / draw / end workflow.',
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/example/webgpu-spritebatch' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/DanFessler/webgpu-spritebatch' },
       ],
       customCss: ['./src/styles/custom.css'],
       sidebar: [
