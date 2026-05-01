@@ -1,0 +1,192 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "webgpu-spritebatch",
+    template: "splash",
+    hero: { title: " ", tagline: " " },
+    pagefind: false,
+  }}
+  headings={[]}
+>
+  <div class="hero-section">
+    <canvas id="hero-boids" class="hero-boids" aria-hidden="true"></canvas>
+    <div class="hero-badge">Inspired by XNA / MonoGame</div>
+    <h1 class="hero-title">
+      <span class="accent">SpriteBatch</span> for WebGPU
+    </h1>
+    <p class="hero-subtitle">
+      Draw thousands of textured, tinted, rotated 2D sprites with a familiar
+      <code>begin</code>&nbsp;/&nbsp;<code>draw</code>&nbsp;/&nbsp;<code
+        >end</code
+      >
+      workflow &mdash; entirely on the GPU.
+    </p>
+    <div class="hero-actions">
+      <a href="/getting-started/introduction/" class="btn-primary"
+        >Get Started</a
+      >
+      <a href="/demos/" class="btn-secondary">Live Demos</a>
+      <a href="/reference/sprite-batch/" class="btn-secondary">API Reference</a>
+    </div>
+
+    <div class="hero-code">
+      <pre><code><span style="color:#7c8da4">import</span> {'{'} RenderSurface, SpriteBatch, Texture2D, Color {'}'} <span style="color:#7c8da4">from</span> <span style="color:#a5d6ff">'webgpu-spritebatch'</span>
+
+<span style="color:#7c8da4">const</span> surface = <span style="color:#7c8da4">await</span> RenderSurface.create(canvas)
+<span style="color:#7c8da4">const</span> batch   = <span style="color:#7c8da4">new</span> SpriteBatch(surface)
+<span style="color:#7c8da4">const</span> tex     = <span style="color:#7c8da4">await</span> Texture2D.fromUrl(surface, <span style="color:#a5d6ff">'/hero.png'</span>)
+
+surface.beginFrame({'{'} clearColor: Color.cornflowerBlue {'}'})
+batch.begin()
+batch.draw(tex, {'{'} position: [<span style="color:var(--sl-color-accent)">100</span>, <span style="color:var(--sl-color-accent)">80</span>], scale: <span style="color:var(--sl-color-accent)">2</span>, rotation: <span style="color:var(--sl-color-accent)">0.1</span> {'}'})
+batch.end()
+surface.endFrame()</code></pre>
+    </div>
+  </div>
+
+  <script>
+    import { startHeroBoids } from "../hero-boids.ts";
+
+    const hero = document.querySelector<HTMLElement>(".hero-section");
+    const canvas = document.querySelector<HTMLCanvasElement>("#hero-boids");
+    if (hero && canvas) startHeroBoids(hero, canvas);
+  </script>
+
+  <section class="motivation">
+    <h2>Why webgpu-spritebatch?</h2>
+    <p>
+      If you've used <span class="highlight">XNA, MonoGame, or FNA</span>, you
+      know SpriteBatch: a clean, low-ceremony API that batches textured quads
+      into efficient GPU draw calls. On the web, you can go all-in with a full
+      engine (PixiJS, Phaser, Babylon) or wrestle raw WebGPU yourself. Neither
+      is ideal when all you want is
+      <span class="highlight">fast, correct 2D sprite rendering</span> without an
+      opinion about your game loop, scene graph, or asset pipeline.
+    </p>
+    <p>
+      This library fills that gap. It gives you <span class="highlight"
+        >instanced rendering</span
+      >, sort modes, blend presets, custom WGSL shaders, render textures,
+      cameras, and spritesheet animation &mdash; all in a small,
+      TypeScript-first package that stays out of your way.
+    </p>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <div class="feature-icon">&#9889;</div>
+      <h3>Instanced Rendering</h3>
+      <p>
+        One draw call per texture group. Thousands of sprites at 60 fps with
+        minimal GPU overhead.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127912;</div>
+      <h3>Custom WGSL Shaders</h3>
+      <p>
+        Plug in any fragment shader while keeping the built-in vertex and
+        instance layout. Add CRT, grayscale, outlines, or anything you can write
+        in WGSL.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128247;</div>
+      <h3>Render Textures</h3>
+      <p>
+        Draw sprites into offscreen textures for post-processing, minimaps, or
+        pixel-art virtual resolutions.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127916;</div>
+      <h3>Camera2D</h3>
+      <p>
+        Pan, zoom, and rotate with a familiar XNA-style transform matrix.
+        World/screen coordinate conversion included.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#9881;</div>
+      <h3>Sort & Blend Modes</h3>
+      <p>
+        Deferred, texture, front-to-back, or back-to-front sorting. Alpha,
+        additive, opaque, and premultiplied blending.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128196;</div>
+      <h3>TypeScript-First</h3>
+      <p>
+        Full type declarations, strong autocomplete, and clear option objects.
+        No runtime type coercion surprises.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127902;</div>
+      <h3>Sprite Animation</h3>
+      <p>
+        Frame sequencing for spritesheets with loop, once, and ping-pong modes.
+        Slice and pick sub-animations from a master sheet.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128302;</div>
+      <h3>DPI-Aware</h3>
+      <p>
+        All coordinates use CSS pixels. The canvas renders at native device
+        resolution automatically for crisp Retina output.
+      </p>
+    </div>
+  </section>
+
+  <section class="comparison">
+    <h2>When to use it</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Approach</th>
+          <th>Best for</th>
+          <th>Trade-off</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>webgpu-spritebatch</strong></td>
+          <td
+            >Fast 2D sprite rendering with full control over your game loop and
+            architecture</td
+          >
+          <td>No scene graph, physics, or asset pipeline included</td>
+        </tr>
+        <tr>
+          <td>Full engine (Pixi, Phaser, etc.)</td>
+          <td>Complete game framework with editor, scenes, and plugins</td>
+          <td
+            >Larger dependency, opinions about structure, may not use WebGPU
+            natively</td
+          >
+        </tr>
+        <tr>
+          <td>Raw WebGPU</td>
+          <td>Total ownership of the rendering pipeline</td>
+          <td>Significant boilerplate for basic sprite batching</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="cta-footer">
+    <h2>Ready to draw some sprites?</h2>
+    <p>Get up and running in under a minute.</p>
+    <div class="hero-actions">
+      <a href="/getting-started/installation/" class="btn-primary"
+        >Install Now</a
+      >
+      <a href="/demos/" class="btn-secondary">Try the Demos</a>
+    </div>
+  </section>
+</StarlightPage>

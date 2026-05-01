@@ -1,0 +1,59 @@
+---
+title: SpriteEffect
+description: API reference for the SpriteEffect class.
+---
+
+Controls the fragment shader used during rendering. Three built-in effects are provided, plus a factory for custom shaders.
+
+## Built-in effects
+
+| Preset | Description |
+|--------|-------------|
+| `SpriteEffect.defaultTextured` | `texture × tint color` with alpha blending |
+| `SpriteEffect.alphaCutout` | Discards pixels with alpha &lt; 0.5; enables depth prepass |
+| `SpriteEffect.solidColor` | Ignores the texture; renders flat `color` |
+
+## Custom effects
+
+### `static custom(name, fragmentWgsl, options?)`
+
+Create a custom fragment shader effect.
+
+```ts
+const grayscale = SpriteEffect.custom('grayscale', /* wgsl */ `
+  @fragment
+  fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+    let tex = textureSample(sprite_tex, sprite_sampler, in.uv);
+    let gray = dot(tex.rgb, vec3f(0.299, 0.587, 0.114));
+    return vec4f(vec3f(gray), tex.a) * in.color;
+  }
+`)
+```
+
+#### Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `params` | `Record<string, ParamDef>` | Named shader parameters with types and defaults |
+| `depthPrepass` | `boolean` | Enable depth prepass |
+| `depthFragmentWgsl` | `string` | Custom depth fragment shader |
+
+### `static variant(effect, defaults)`
+
+Create a variant with different default parameter values. Shares the same shader and pipeline.
+
+```ts
+const subtleCrt = SpriteEffect.variant(crt, {
+  distortion: 0.1,
+  scanline_intensity: 0.05,
+})
+```
+
+## Parameter types
+
+| ParamType | JS value | WGSL size/align |
+|-----------|----------|-----------------|
+| `'f32'` | `number` | 4 / 4 |
+| `'vec2f'` | `[number, number]` | 8 / 8 |
+| `'vec3f'` | `[number, number, number]` | 12 / 16 |
+| `'vec4f'` | `[number, number, number, number]` | 16 / 16 |

@@ -1,0 +1,47 @@
+---
+title: States & Presets
+description: Pre-configured blend states, sampler states, and color presets.
+---
+
+## Blend states
+
+Pre-configured blend mode descriptors for `BeginOptions.blendState`:
+
+| Preset | Description |
+|--------|-------------|
+| `BlendState.alphaBlend` | Standard alpha blending (default) |
+| `BlendState.additive` | Additive blending (glow, particles) |
+| `BlendState.opaque` | No blending — source overwrites destination |
+| `BlendState.premultipliedAlpha` | For pre-multiplied alpha textures |
+
+## Sampler states
+
+Pre-configured texture sampling descriptors for `BeginOptions.samplerState`:
+
+| Preset | Description |
+|--------|-------------|
+| `SamplerState.linearClamp` | Bilinear filtering, clamp to edge (default) |
+| `SamplerState.linearWrap` | Bilinear filtering, repeat/wrap |
+| `SamplerState.pointClamp` | Nearest-neighbor, clamp to edge (pixel art) |
+| `SamplerState.pointWrap` | Nearest-neighbor, repeat/wrap |
+
+## Color
+
+Color presets and factory:
+
+```ts
+import { Color } from 'webgpu-spritebatch'
+
+Color.white       // { r: 1, g: 1, b: 1, a: 1 }
+Color.black
+Color.transparent
+Color.red
+Color.green
+Color.blue
+Color.yellow
+Color.cyan
+Color.magenta
+Color.cornflowerBlue
+
+Color.rgba(0.5, 0.8, 1.0, 0.9)  // custom color
+```

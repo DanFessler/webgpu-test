@@ -23,7 +23,10 @@
     "build:lib": "vite build --mode lib && tsc -p tsconfig.lib.json",
     "build:all": "npm run build:lib && npm run build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "site:dev": "npm run dev --prefix site",
+    "site:build": "npm run build --prefix site",
+    "site:preview": "npm run preview --prefix site"
   },
   "keywords": [
     "webgpu",

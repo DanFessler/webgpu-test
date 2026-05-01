@@ -1,0 +1,354 @@
+:root {
+  --sl-color-accent-low: #3a2600;
+  --sl-color-accent: #ffb000;
+  --sl-color-accent-high: #ffb000;
+  --brand-accent-rgb: 255, 176, 0;
+  --sl-font: "Inter", system-ui, -apple-system, sans-serif;
+  --sl-text-h1: clamp(2rem, 4vw, 3rem);
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #fff2cc;
+  --sl-color-accent: #ffb000;
+  --sl-color-accent-high: #ffb000;
+  --brand-accent-rgb: 154, 103, 0;
+}
+
+/* Hide the default Starlight hero on splash pages — we use our own */
+.hero {
+  display: none !important;
+}
+
+/* Make splash (hero) pages full-bleed with no gaps */
+[data-has-hero] main {
+  padding: 0 !important;
+}
+
+[data-has-hero] .content-panel {
+  padding: 0 !important;
+}
+
+[data-has-hero] .content-panel .sl-container {
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+[data-has-hero] .sl-markdown-content {
+  max-width: 100% !important;
+}
+
+[data-has-hero] .sl-container > * + * {
+  margin-top: 0 !important;
+}
+
+/* Make the fixed nav header transparent on hero/splash pages */
+[data-has-hero] .page > .header {
+  background-color: transparent !important;
+  border-bottom: none !important;
+}
+
+/* Pull hero up behind the transparent fixed header for a seamless look */
+[data-has-hero] .main-frame {
+  padding-top: 0 !important;
+}
+
+/* Homepage hero overrides */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--sl-nav-height, 3.5rem) + 3rem) 2rem 4rem;
+  text-align: center;
+  background: linear-gradient(160deg, #05080a 0%, #0d151a 48%, #101f24 100%);
+  border-bottom: 1px solid rgba(0, 217, 255, 0.18);
+  margin: 0;
+  width: 100%;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 60% 45% at 50% 10%,
+      rgba(0, 217, 255, 0.22) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 45% 35% at 80% 70%,
+      rgba(182, 255, 0, 0.12) 0%,
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+.hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 45% 55% at 50% 44%,
+    rgba(0, 217, 255, 0.614) 0%,
+    rgba(0, 217, 255, 0.382) 25%,
+    rgba(0, 191, 255, 0.202) 60%,
+    rgba(19, 20, 48, 0.761) 150%
+  );
+  pointer-events: none;
+}
+
+.hero-boids {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.hero-section > *:not(.hero-boids) {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.35);
+  background: rgba(var(--brand-accent-rgb), 0.08);
+  color: var(--sl-color-accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.hero-title {
+  margin: 0 auto 1rem;
+  max-width: 48rem;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #f1f5f9;
+}
+
+.hero-title .accent {
+  color: var(--sl-color-accent);
+}
+
+.hero-subtitle {
+  margin: 0 auto 2.5rem;
+  max-width: 36rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.hero-actions a:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--sl-color-accent);
+  color: #041014 !important;
+  box-shadow: 0 2px 16px rgba(var(--brand-accent-rgb), 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 22px rgba(var(--brand-accent-rgb), 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--sl-color-accent-high) !important;
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.16);
+}
+
+.btn-secondary:hover {
+  background: rgba(var(--brand-accent-rgb), 0.08);
+  border-color: rgba(var(--brand-accent-rgb), 0.28);
+}
+
+/* Code sample in hero */
+.hero-code {
+  max-width: 40rem;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.12);
+  background: rgba(5, 8, 10, 0.72);
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.hero-code pre {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+}
+
+/* Feature grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 4rem 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.feature-card {
+  padding: 1.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--sl-color-hairline-light);
+  background: rgba(var(--brand-accent-rgb), 0.02);
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.feature-card:hover {
+  border-color: rgba(var(--brand-accent-rgb), 0.26);
+  background: rgba(var(--brand-accent-rgb), 0.04);
+}
+
+.feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: rgba(var(--brand-accent-rgb), 0.12);
+  color: var(--sl-color-accent);
+  font-size: 1.2rem;
+}
+
+.feature-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sl-color-white);
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--sl-color-gray-2);
+}
+
+/* Motivation section */
+.motivation {
+  padding: 4rem 2rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.motivation h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--sl-color-white);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.motivation p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--sl-color-gray-2);
+  margin-bottom: 1rem;
+}
+
+.motivation .highlight {
+  color: var(--sl-color-accent-high);
+  font-weight: 500;
+}
+
+/* Comparison table */
+.comparison {
+  padding: 2rem 2rem 4rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.comparison h2 {
+  text-align: center;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--sl-color-white);
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.comparison th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid rgba(var(--brand-accent-rgb), 0.32);
+  color: var(--sl-color-accent);
+  font-weight: 600;
+}
+
+.comparison td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--sl-color-hairline-light);
+  color: var(--sl-color-gray-2);
+}
+
+.comparison tr:hover td {
+  background: rgba(var(--brand-accent-rgb), 0.04);
+}
+
+/* CTA footer */
+.cta-footer {
+  text-align: center;
+  padding: 4rem 2rem;
+  border-top: 1px solid var(--sl-color-hairline-light);
+}
+
+.cta-footer h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--sl-color-white);
+  margin-bottom: 1rem;
+}
+
+.cta-footer p {
+  color: var(--sl-color-gray-2);
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+}

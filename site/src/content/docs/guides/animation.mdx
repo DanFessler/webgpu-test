@@ -1,0 +1,73 @@
+---
+title: Animation
+description: Spritesheet frame sequencing with loop, once, and ping-pong modes.
+---
+
+`SpriteAnimation` is a CPU-side frame sequencer for spritesheet animations. It produces `Rect` values to pass as `sourceRect` to `SpriteBatch.draw()`.
+
+## From a grid spritesheet
+
+```ts
+import { SpriteAnimation } from 'webgpu-spritebatch'
+
+const anim = SpriteAnimation.fromGrid(texture, {
+  columns: 8,
+  rows: 4,
+  frameCount: 30,      // defaults to columns x rows
+  frameDuration: 0.1,  // seconds per frame
+  mode: 'loop',        // 'loop' | 'once' | 'pingPong'
+})
+```
+
+## From arbitrary rectangles
+
+```ts
+const anim = SpriteAnimation.fromRects(myRects, {
+  frameDuration: 0.1,
+  mode: 'loop',
+})
+```
+
+## Sub-animations
+
+Extract sub-animations from a master animation without copying frame data:
+
+```ts
+const idle   = sheet.slice(0, 8)
+const attack = sheet.pick([16, 17, 18, 19, 18, 17])
+const death  = sheet.slice(24, 30, { frameDuration: 0.15, mode: 'once' })
+```
+
+## Playback
+
+```ts
+// Each frame:
+anim.update(deltaTime)
+
+batch.draw(spriteSheet, {
+  position: [x, y],
+  sourceRect: anim.currentFrame,
+})
+```
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `currentFrame` | `Rect` | Source rectangle for the current frame |
+| `frameIndex` | `number` | Current frame index |
+| `frameCount` | `number` | Total frames |
+| `isComplete` | `boolean` | `true` when mode is `'once'` and finished |
+| `isPlaying` | `boolean` | Whether the animation is playing |
+| `speed` | `number` | Playback speed multiplier (default `1`) |
+| `mode` | `AnimationMode` | Playback mode |
+| `frameDuration` | `number` | Seconds per frame |
+
+## Methods
+
+| Method | Description |
+|--------|-------------|
+| `update(dt)` | Advance by `dt` seconds |
+| `play()` | Resume (resets if complete) |
+| `pause()` | Pause at current frame |
+| `reset()` | Rewind to frame 0 and start playing |

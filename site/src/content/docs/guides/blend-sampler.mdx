@@ -1,0 +1,51 @@
+---
+title: Blend & Sampler States
+description: Pre-configured blend modes and texture sampling options.
+---
+
+## Blend states
+
+Set the blend mode in `begin()`:
+
+```ts
+import { BlendState } from 'webgpu-spritebatch'
+
+batch.begin({ blendState: BlendState.additive })
+```
+
+| Preset | Description |
+|--------|-------------|
+| `BlendState.alphaBlend` | Standard alpha blending (default) |
+| `BlendState.additive` | Additive blending — great for glow and particles |
+| `BlendState.opaque` | No blending — source overwrites destination |
+| `BlendState.premultipliedAlpha` | For pre-multiplied alpha textures |
+
+## Sampler states
+
+Set the texture filtering/wrapping in `begin()`:
+
+```ts
+import { SamplerState } from 'webgpu-spritebatch'
+
+batch.begin({ samplerState: SamplerState.pointClamp })
+```
+
+| Preset | Description |
+|--------|-------------|
+| `SamplerState.linearClamp` | Bilinear filtering, clamp to edge (default) |
+| `SamplerState.linearWrap` | Bilinear filtering, repeat/wrap |
+| `SamplerState.pointClamp` | Nearest-neighbor, clamp to edge (pixel art) |
+| `SamplerState.pointWrap` | Nearest-neighbor, repeat/wrap |
+
+## Combining them
+
+A common pattern for pixel-art rendering:
+
+```ts
+batch.begin({
+  samplerState: SamplerState.pointClamp,
+  blendState: BlendState.alphaBlend,
+  sortMode: 'frontToBack',
+  effect: SpriteEffect.alphaCutout,
+})
+```

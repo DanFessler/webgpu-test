@@ -1,0 +1,100 @@
+---
+title: Custom Shaders
+description: Write custom WGSL fragment shaders with typed parameters.
+---
+
+The library ships three built-in effects (`defaultTextured`, `alphaCutout`, `solidColor`) and a factory for custom fragment shaders.
+
+## Creating a custom effect
+
+```ts
+import { SpriteEffect } from 'webgpu-spritebatch'
+
+const grayscale = SpriteEffect.custom('grayscale', /* wgsl */ `
+  @fragment
+  fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+    let tex = textureSample(sprite_tex, sprite_sampler, in.uv);
+    let gray = dot(tex.rgb, vec3f(0.299, 0.587, 0.114));
+    return vec4f(vec3f(gray), tex.a) * in.color;
+  }
+`)
+```
+
+Your fragment shader is concatenated after the built-in preamble. The entry point must be `fn fs_main(in: VertexOutput) -> @location(0) vec4f`.
+
+## Available globals
+
+| Name | Type | Description |
+|------|------|-------------|
+| `in.uv` | `vec2f` | Interpolated texture coordinates |
+| `in.color` | `vec4f` | Per-instance tint color |
+| `in.clip_pos` | `vec4f` | Clip-space position |
+| `sprite_tex` | `texture_2d<f32>` | The bound sprite texture |
+| `sprite_sampler` | `sampler` | The bound sampler |
+| `screen.size` | `vec4f` | `.x` = width, `.y` = height (CSS px), `.z` = time |
+| `screen.transform` | `mat4x4f` | The current transform matrix |
+
+## Shader parameters
+
+Effects can declare named parameters that are passed as a uniform buffer. Define a schema with default values when creating the effect:
+
+```ts
+const crt = SpriteEffect.custom('crt', /* wgsl */ `
+  @fragment
+  fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+    var uv = in.uv;
+    let center = uv - 0.5;
+    let r2 = dot(center, center);
+    uv = uv + center * r2 * params.distortion;
+    let t = textureSample(sprite_tex, sprite_sampler, uv);
+    let scan = (1.0 - params.scanline_intensity)
+             + params.scanline_intensity * sin(uv.y * screen.size.y * 3.14159);
+    return vec4f(t.rgb * scan, t.a) * in.color;
+  }
+`, {
+  params: {
+    distortion: { type: 'f32', default: 0.3 },
+    scanline_intensity: { type: 'f32', default: 0.15 },
+  },
+})
+```
+
+Use with default values or override per-batch:
+
+```ts
+batch.begin({ effect: crt })
+batch.begin({ effect: crt, effectParams: { distortion: 0.8 } })
+```
+
+### Supported parameter types
+
+| ParamType | JS value | WGSL size/align |
+|-----------|----------|-----------------|
+| `'f32'` | `number` | 4 / 4 |
+| `'vec2f'` | `[number, number]` | 8 / 8 |
+| `'vec3f'` | `[number, number, number]` | 12 / 16 |
+| `'vec4f'` | `[number, number, number, number]` | 16 / 16 |
+
+## Effect variants
+
+Create a new effect with different default parameter values:
+
+```ts
+const subtleCrt = SpriteEffect.variant(crt, {
+  distortion: 0.1,
+  scanline_intensity: 0.05,
+})
+```
+
+The variant shares the same shader and pipeline — only the default values differ.
+
+## Depth prepass with custom shaders
+
+For depth testing with custom shaders, provide a `depthFragmentWgsl`:
+
+```ts
+const cutout = SpriteEffect.custom('myCutout', fragWgsl, {
+  depthPrepass: true,
+  depthFragmentWgsl: depthFragWgsl,
+})
+```

@@ -1,0 +1,65 @@
+---
+title: RenderTexture2D
+description: API reference for the RenderTexture2D class.
+---
+
+An offscreen render target that can be drawn into and then sampled as a regular texture. Both `RenderSurface` and `RenderTexture2D` implement the `RenderDestination` interface.
+
+## Creating
+
+```ts
+import { RenderTexture2D } from 'webgpu-spritebatch'
+
+const scene = RenderTexture2D.create(surface, { width: 320, height: 180 })
+```
+
+## Members
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `texture` | `Texture2D` | The underlying texture — pass to `batch.draw()` |
+| `width` / `height` | `number` | Texture dimensions in pixels |
+| `format` | `GPUTextureFormat` | Color texture format |
+| `colorView` / `depthView` | `GPUTextureView` | Render attachment views |
+
+## Methods
+
+### `static create(surface, options)`
+
+Create a render texture with explicit dimensions.
+
+```ts
+const rt = RenderTexture2D.create(surface, { width: 640, height: 360 })
+```
+
+### `clear(options?)`
+
+Clear color and depth. `clearColor` defaults to transparent.
+
+```ts
+scene.clear({ clearColor: Color.transparent })
+```
+
+### `resize(width, height)`
+
+Recreate at a new size.
+
+```ts
+scene.resize(640, 360)
+```
+
+### `resizeToSurface(surface?)`
+
+Resize to match the surface's physical dimensions.
+
+```ts
+scene.resizeToSurface()
+```
+
+### `destroy()`
+
+Release GPU textures.
+
+```ts
+scene.destroy()
+```

@@ -1,0 +1,60 @@
+---
+title: Render Textures
+description: Draw sprites to offscreen textures for post-processing, minimaps, or virtual resolutions.
+---
+
+`RenderTexture2D` is an offscreen render target that can be drawn into and then sampled as a regular texture. Both `RenderSurface` and `RenderTexture2D` implement the `RenderDestination` interface.
+
+## Creating a render texture
+
+```ts
+import { RenderTexture2D } from 'webgpu-spritebatch'
+
+const scene = RenderTexture2D.create(surface, { width: 320, height: 180 })
+```
+
+## Drawing into it
+
+Pass the render texture as the `target` in `begin()`:
+
+```ts
+scene.clear({ clearColor: Color.transparent })
+
+batch.begin({
+  target: scene,
+  samplerState: SamplerState.pointClamp,
+})
+batch.draw(playerTex, { position: [80, 60] })
+batch.end()
+```
+
+## Sampling it back to the screen
+
+Draw the render texture's underlying `Texture2D` to the screen, optionally with a post-process effect:
+
+```ts
+batch.begin({ effect: crtEffect })
+batch.draw(scene.texture, {
+  destinationRect: { x: 0, y: 0, width: surface.width, height: surface.height },
+})
+batch.end()
+```
+
+## Common patterns
+
+- **Pixel-art virtual resolution** — render at 320x180, then upscale to screen with `pointClamp`.
+- **Post-processing** — render the scene, then draw it back with a CRT, grayscale, or bloom shader.
+- **Minimap** — render a downscaled view of the world into a small texture, then draw it in a corner.
+
+## Resizing
+
+```ts
+scene.resize(640, 360)
+scene.resizeToSurface()  // match the surface's physical dimensions
+```
+
+## Cleanup
+
+```ts
+scene.destroy()
+```

@@ -1,0 +1,96 @@
+---
+title: SpriteBatch
+description: API reference for the SpriteBatch class.
+---
+
+Collects sprite draw calls between `begin` / `end` and flushes them as instanced GPU draws grouped by texture. You can call `begin`/`end` multiple times per frame.
+
+## Constructor
+
+```ts
+import { SpriteBatch } from 'webgpu-spritebatch'
+
+const batch = new SpriteBatch(surface, { maxSprites: 10_000 })
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `surface` | `RenderSurface` | The render surface to draw to |
+| `options.maxSprites` | `number` | Maximum sprites per `begin`/`end` pair (default `10_000`) |
+
+## Methods
+
+### `begin(options?)`
+
+Start a batch. All configuration is set here.
+
+```ts
+batch.begin({
+  sortMode: 'frontToBack',
+  blendState: BlendState.alphaBlend,
+  samplerState: SamplerState.pointClamp,
+  effect: SpriteEffect.alphaCutout,
+  transformMatrix: cam.getTransformMatrix(),
+  target: renderTexture,
+  time: elapsed,
+})
+```
+
+#### BeginOptions
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `sortMode` | `SpriteSortMode` | `'deferred'` | How sprites are ordered before rendering |
+| `blendState` | `BlendStateDescriptor` | `BlendState.alphaBlend` | GPU blend mode |
+| `samplerState` | `SamplerStateDescriptor` | `SamplerState.linearClamp` | Texture filtering/wrapping |
+| `effect` | `SpriteEffectDescriptor` | `SpriteEffect.defaultTextured` | Shader effect |
+| `effectParams` | `Record<string, number \| number[]>` | — | Custom shader parameter values |
+| `transformMatrix` | `Float32Array` | identity | 4x4 column-major transform |
+| `time` | `number` | `0` | Elapsed time (accessible in shaders as `screen.size.z`) |
+| `target` | `RenderDestination` | surface | Render destination |
+
+### `draw(texture, options?)`
+
+Queue one sprite.
+
+```ts
+batch.draw(tex, {
+  position: [100, 80],
+  scale: 2,
+  rotation: 0.1,
+  origin: [tex.width / 2, tex.height / 2],
+  color: Color.white,
+  layerDepth: 0.5,
+})
+```
+
+#### DrawOptions
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `position` | `[x, y]` | `[0, 0]` | Top-left position in CSS pixels |
+| `destinationRect` | `Rect` | — | Draw into an explicit rectangle (overrides position/scale) |
+| `sourceRect` | `Rect` | full texture | Sub-region of the texture |
+| `color` | `ColorRGBA` | white | Tint color multiplied with the texture |
+| `rotation` | `number` | `0` | Rotation in radians |
+| `origin` | `[x, y]` | `[0, 0]` | Rotation/position pivot in source-texture pixels |
+| `scale` | `number \| [x, y]` | `1` | Scale factor |
+| `flip` | `SpriteFlip` | `'none'` | `'horizontal'`, `'vertical'`, or `'both'` |
+| `layerDepth` | `number` | `0` | Depth value (0–1) for sorting and depth testing |
+
+### `end()`
+
+Sort, upload, and render all queued sprites.
+
+```ts
+batch.end()
+```
+
+## Sort modes
+
+| Mode | Behavior |
+|------|----------|
+| `'deferred'` | Draw order preserved (no sort) |
+| `'texture'` | Grouped by texture ID |
+| `'frontToBack'` | Ascending `layerDepth` |
+| `'backToFront'` | Descending `layerDepth` |

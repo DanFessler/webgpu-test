@@ -1,0 +1,62 @@
+---
+title: RenderSurface
+description: API reference for the RenderSurface class.
+---
+
+Manages the WebGPU adapter, GPU device, canvas context, surface format, depth texture, and per-frame command encoder.
+
+## Creating a surface
+
+```ts
+import { RenderSurface } from 'webgpu-spritebatch'
+
+const surface = await RenderSurface.create(canvas)
+```
+
+`create()` is an async factory that requests a WebGPU adapter and device, configures the canvas context, and creates a depth texture.
+
+## Members
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `canvas` | `HTMLCanvasElement` | The underlying canvas element |
+| `gpuDevice` | `GPUDevice` | The raw GPU device for advanced usage |
+| `format` | `GPUTextureFormat` | The preferred canvas texture format |
+| `depthFormat` | `GPUTextureFormat` | The depth texture format (`depth24plus`) |
+| `width` / `height` | `number` | Canvas size in CSS pixels |
+| `physicalWidth` / `physicalHeight` | `number` | Canvas size in device pixels |
+| `dpr` | `number` | Current device pixel ratio |
+| `commandEncoder` | `GPUCommandEncoder` | Current frame's command encoder |
+| `colorView` / `depthView` | `GPUTextureView` | Current frame's render target views |
+
+## Methods
+
+### `static create(canvas)`
+
+Async factory. Requests a WebGPU adapter and device, configures the canvas context.
+
+```ts
+const surface = await RenderSurface.create(canvas)
+```
+
+### `beginFrame(options?)`
+
+Resizes the canvas if needed, clears color and depth, and starts a command encoder.
+
+```ts
+surface.beginFrame({
+  clearColor: { r: 0.39, g: 0.58, b: 0.93, a: 1 }
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `clearColor` | `ColorRGBA` | Black | Background clear color |
+
+### `endFrame()`
+
+Submits the command buffer to the GPU.
+
+```ts
+surface.endFrame()
+```

@@ -1,0 +1,57 @@
+---
+title: Camera2D
+description: API reference for the Camera2D class.
+---
+
+A 2D camera that produces a transform matrix for `SpriteBatch.begin()`. Follows the XNA convention.
+
+## Constructor
+
+```ts
+import { Camera2D } from 'webgpu-spritebatch'
+
+const cam = new Camera2D()
+```
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `position` | `[x, y]` | World-space point the camera is centered on |
+| `origin` | `[x, y]` | Screen-space anchor (typically screen center) |
+| `zoom` | `number` | Zoom factor (1 = no zoom) |
+| `rotation` | `number` | Rotation in radians |
+
+## Methods
+
+### `getTransformMatrix()`
+
+Returns a `Float32Array(16)` — a 4x4 column-major matrix to pass to `BeginOptions.transformMatrix`.
+
+```ts
+batch.begin({ transformMatrix: cam.getTransformMatrix() })
+```
+
+### `lookAt(x, y)`
+
+Shorthand for setting `position`.
+
+```ts
+cam.lookAt(playerX, playerY)
+```
+
+### `screenToWorld(sx, sy)`
+
+Convert screen coordinates to world coordinates. Returns `[x, y]`.
+
+```ts
+const [wx, wy] = cam.screenToWorld(mouseX, mouseY)
+```
+
+### `worldToScreen(wx, wy)`
+
+Convert world coordinates to screen coordinates. Returns `[x, y]`.
+
+```ts
+const [sx, sy] = cam.worldToScreen(entityX, entityY)
+```

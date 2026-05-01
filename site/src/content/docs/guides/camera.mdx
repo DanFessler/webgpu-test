@@ -1,0 +1,72 @@
+---
+title: Camera
+description: Use Camera2D for panning, zooming, and rotating the 2D view.
+---
+
+`Camera2D` produces a 4x4 transform matrix that you pass to `SpriteBatch.begin()`. It follows the XNA convention where the camera transforms world coordinates to screen coordinates.
+
+## Basic setup
+
+```ts
+import { Camera2D } from 'webgpu-spritebatch'
+
+const cam = new Camera2D()
+cam.position = [worldX, worldY]
+cam.origin = [surface.width / 2, surface.height / 2]
+cam.zoom = 2
+cam.rotation = 0.1
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `position` | `[x, y]` | World-space point the camera is centered on |
+| `origin` | `[x, y]` | Screen-space anchor (typically screen center) |
+| `zoom` | `number` | Zoom factor (1 = no zoom) |
+| `rotation` | `number` | Rotation in radians |
+
+## Using the camera
+
+Pass the transform matrix to `begin()`:
+
+```ts
+cam.origin = [surface.width / 2, surface.height / 2]
+
+batch.begin({ transformMatrix: cam.getTransformMatrix() })
+batch.draw(worldSprite, { position: [worldX, worldY] })
+batch.end()
+```
+
+## World and HUD layers
+
+Use multiple `begin`/`end` pairs. The first batch uses the camera for world sprites; the second omits it for screen-space UI:
+
+```ts
+// World sprites (camera applied)
+batch.begin({ transformMatrix: cam.getTransformMatrix() })
+batch.draw(player, { position: [px, py] })
+batch.end()
+
+// HUD (no camera)
+batch.begin()
+batch.draw(healthBar, { position: [10, 10] })
+batch.end()
+```
+
+## Coordinate conversion
+
+Convert between screen and world coordinates:
+
+```ts
+const [wx, wy] = cam.screenToWorld(mouseX, mouseY)
+const [sx, sy] = cam.worldToScreen(entityX, entityY)
+```
+
+## Virtual resolution
+
+For pixel-art games with a fixed design resolution:
+
+```ts
+cam.zoom = surface.width / 320
+cam.origin = [surface.width / 2, surface.height / 2]
+// All positions are now in 320x180 virtual space
+```

@@ -1,0 +1,81 @@
+---
+title: SpriteAnimation
+description: API reference for the SpriteAnimation class.
+---
+
+CPU-side frame sequencer for spritesheet animations. Produces `Rect` values to pass as `sourceRect` to `SpriteBatch.draw()`.
+
+## Factory methods
+
+### `static fromGrid(texture, options)`
+
+Create an animation from a uniform grid spritesheet.
+
+```ts
+const anim = SpriteAnimation.fromGrid(texture, {
+  columns: 8,
+  rows: 4,
+  frameCount: 30,
+  frameDuration: 0.1,
+  mode: 'loop',
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `columns` | `number` | required | Grid columns |
+| `rows` | `number` | required | Grid rows |
+| `frameCount` | `number` | columns × rows | Total frames |
+| `frameDuration` | `number` | required | Seconds per frame |
+| `mode` | `AnimationMode` | `'loop'` | `'loop'`, `'once'`, or `'pingPong'` |
+
+### `static fromRects(rects, options)`
+
+Create an animation from arbitrary source rectangles.
+
+```ts
+const anim = SpriteAnimation.fromRects(myRects, {
+  frameDuration: 0.1,
+  mode: 'loop',
+})
+```
+
+## Sub-animations
+
+### `slice(start, end, options?)`
+
+Extract a contiguous range of frames.
+
+```ts
+const idle = sheet.slice(0, 8)
+```
+
+### `pick(indices, options?)`
+
+Pick specific frames in any order.
+
+```ts
+const attack = sheet.pick([16, 17, 18, 19, 18, 17])
+```
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `currentFrame` | `Rect` | Source rectangle for the current frame |
+| `frameIndex` | `number` | Current frame index |
+| `frameCount` | `number` | Total frames |
+| `isComplete` | `boolean` | `true` when mode is `'once'` and finished |
+| `isPlaying` | `boolean` | Whether playing |
+| `speed` | `number` | Playback speed multiplier |
+| `mode` | `AnimationMode` | Playback mode |
+| `frameDuration` | `number` | Seconds per frame |
+
+## Methods
+
+| Method | Description |
+|--------|-------------|
+| `update(dt)` | Advance by `dt` seconds |
+| `play()` | Resume (resets if complete) |
+| `pause()` | Pause at current frame |
+| `reset()` | Rewind to frame 0 and start playing |

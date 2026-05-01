@@ -1,0 +1,515 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Live Demos",
+    template: "splash",
+    hero: { tagline: "" },
+    prev: false,
+  }}
+  headings={[]}
+>
+  <style>
+    .demos-page {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 2rem;
+      margin-top: 4rem;
+    }
+    .demos-intro {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .demos-intro h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--sl-color-white);
+      margin-bottom: 0.5rem;
+    }
+    .demos-intro p {
+      color: var(--sl-color-gray-2);
+      font-size: 1rem;
+    }
+    .demos-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      margin-bottom: 0;
+      border-radius: 12px 12px 0 0;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: none;
+    }
+    .demos-toolbar select {
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      font:
+        600 14px/1 system-ui,
+        sans-serif;
+      cursor: pointer;
+      outline: none;
+    }
+    .demos-toolbar select:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+    .demos-stats {
+      margin-left: auto;
+      font:
+        600 14px/1 system-ui,
+        sans-serif;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .demos-toolbar button {
+      min-width: 64px;
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      font:
+        600 14px/1 system-ui,
+        sans-serif;
+      cursor: pointer;
+    }
+    .demos-toolbar button:disabled {
+      cursor: wait;
+      opacity: 0.5;
+    }
+    .demos-toolbar button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .demos-instructions {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      max-width: min(42rem, calc(100% - 28px));
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(5, 8, 10, 0.72);
+      color: rgba(255, 255, 255, 0.84);
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      font:
+        600 13px/1.4 system-ui,
+        sans-serif;
+    }
+    .demos-instructions[hidden] {
+      display: none;
+    }
+    .demos-instructions::before {
+      content: attr(data-label);
+      color: var(--sl-color-accent);
+    }
+    .demos-canvas-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 0 0 12px 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: none;
+      background: #0a0b10;
+      margin: 0;
+    }
+    .demos-canvas-wrapper canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      outline: none;
+    }
+    .demos-canvas-wrapper:focus-within {
+      box-shadow: 0 0 0 2px rgba(var(--brand-accent-rgb), 0.36);
+    }
+    .demos-no-webgpu {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: rgba(15, 16, 30, 0.97);
+      color: #f1f5f9;
+      font-family: system-ui, sans-serif;
+      text-align: center;
+      padding: 3rem 2rem;
+      backdrop-filter: blur(4px);
+    }
+    .demos-no-webgpu h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .demos-no-webgpu p {
+      color: #94a3b8;
+      max-width: 28rem;
+      margin: 0 auto 1rem;
+      line-height: 1.6;
+    }
+    .demos-no-webgpu a {
+      color: var(--sl-color-accent);
+    }
+    .demo-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .demo-card {
+      padding: 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--sl-color-hairline-light);
+      background: rgba(var(--brand-accent-rgb), 0.02);
+      cursor: pointer;
+      transition:
+        border-color 0.15s,
+        background 0.15s;
+    }
+    .demo-card:hover,
+    .demo-card.active {
+      border-color: rgba(var(--brand-accent-rgb), 0.4);
+      background: rgba(var(--brand-accent-rgb), 0.06);
+    }
+    .demo-card h4 {
+      margin: 0 0 0.35rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--sl-color-white);
+    }
+    .demo-card p {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--sl-color-gray-2);
+    }
+  </style>
+
+  <div class="demos-page">
+    <div class="demos-intro">
+      <h2>Interactive Demo Gallery</h2>
+      <p>
+        See webgpu-spritebatch in action. Pick a demo to explore different
+        features.
+      </p>
+    </div>
+
+    <div class="demos-toolbar">
+      <select id="demo-select" aria-label="Choose demo"></select>
+      <span id="stats" class="demos-stats"></span>
+      <button id="play-stop" type="button" disabled>Loading&hellip;</button>
+    </div>
+
+    <div class="demos-canvas-wrapper">
+      <canvas id="canvas" tabindex="0" aria-label="Interactive demo viewport"
+      ></canvas>
+      <p
+        class="demos-instructions"
+        id="demo-instructions"
+        data-label="Controls:"
+        hidden>
+      </p>
+      <div class="demos-no-webgpu" id="no-webgpu">
+        <h3>WebGPU Not Available</h3>
+        <p>
+          Your browser does not support WebGPU. These demos require Chrome 113+,
+          Edge 113+, or Firefox 141+. Safari support is in progress.
+        </p>
+        <p>
+          <a href="/getting-started/installation/"
+            >See browser requirements &rarr;</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- <div class="demo-cards" id="demo-cards"></div> -->
+  </div>
+
+  <script>
+    async function initDemos() {
+      const canvas = document.querySelector<HTMLCanvasElement>("#canvas")!;
+      const playStopBtn =
+        document.querySelector<HTMLButtonElement>("#play-stop")!;
+      const demoSelect =
+        document.querySelector<HTMLSelectElement>("#demo-select")!;
+      const statsEl = document.querySelector<HTMLSpanElement>("#stats")!;
+      const noWebgpu = document.querySelector<HTMLDivElement>("#no-webgpu")!;
+      const instructionsEl =
+        document.querySelector<HTMLParagraphElement>("#demo-instructions")!;
+      // const demoCards = document.querySelector<HTMLDivElement>("#demo-cards")!;
+      const demoScrollKeys = new Set([
+        " ",
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+        "PageUp",
+        "PageDown",
+      ]);
+
+      canvas.addEventListener("pointerdown", () => canvas.focus());
+      window.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            document.activeElement === canvas &&
+            demoScrollKeys.has(event.key)
+          ) {
+            event.preventDefault();
+          }
+        },
+        { capture: true },
+      );
+      canvas.addEventListener(
+        "wheel",
+        (event) => {
+          if (document.activeElement === canvas) event.preventDefault();
+        },
+        { passive: false },
+      );
+
+      if (!navigator.gpu) {
+        noWebgpu.style.display = "block";
+        playStopBtn.textContent = "Unavailable";
+        return;
+      }
+
+      const { RenderSurface } = await import("@lib/index.ts");
+      const { stressDemo } = await import("@demo/stress.ts");
+      const { bunnyMarkDemo } = await import("@demo/bunnymark.ts");
+      const { basicDemo } = await import("@demo/basic.ts");
+      const { customShaderDemo } = await import("@demo/custom-shader.ts");
+      const { sortingDemo } = await import("@demo/sorting.ts");
+      const { blendDemo } = await import("@demo/blend-modes.ts");
+      const { animationDemo } = await import("@demo/animation.ts");
+      const { cameraDemo } = await import("@demo/camera.ts");
+      const { platformerDemo } = await import("@demo/platformer.ts");
+      const { renderTextureDemo } = await import("@demo/render-texture.ts");
+
+      type DemoInstance = {
+        readonly clearColor?: { r: number; g: number; b: number; a: number };
+        readonly statsText?: () => string;
+        frame(elapsed: number): void;
+        destroy(): void;
+      };
+
+      type DemoDefinition = {
+        readonly label: string;
+        readonly maxSprites: number;
+        setup(surface: any): Promise<DemoInstance>;
+      };
+
+      const DEMO_DESCRIPTIONS: Record<string, string> = {
+        "Stress Test":
+          "Push the renderer with thousands of rotating, tinted sprites.",
+        BunnyMark:
+          "Classic bunnymark benchmark — add more bunnies on click.",
+        Basic:
+          "Simple textured sprite with position, rotation, scale, and tint.",
+        "Custom Shader":
+          "Grayscale, CRT, and other custom WGSL fragment effects.",
+        Sorting:
+          "Front-to-back and back-to-front depth sorting with transparency.",
+        "Blend Modes":
+          "Alpha, additive, opaque, and premultiplied blend modes.",
+        Animation:
+          "Spritesheet frame sequencing with loop and ping-pong modes.",
+        Camera: "Pan, zoom, and rotate with Camera2D.",
+        Platformer: "Tile-based platformer with camera follow and animations.",
+        "Render Texture": "Offscreen rendering with post-processing effects.",
+      };
+
+      const DEMO_OVERLAYS: Record<string, { label: string; text: string }> = {
+        "Basic Drawing": {
+          label: "Info:",
+          text: "Draws sprites with position, scale, rotation, tint, source rectangles, flips, and solid-color quads.",
+        },
+        "Custom Shaders": {
+          label: "Effects:",
+          text: "Default · Grayscale · Wave Distort · Outline · Solid Color",
+        },
+        BunnyMark: {
+          label: "Controls:",
+          text: "Hold or click the canvas to add bunnies. Release to switch bunny type.",
+        },
+        "Sorting & Depth": {
+          label: "Controls:",
+          text: "Press Space or ArrowRight to cycle sort modes. Press ArrowLeft to go back.",
+        },
+        "Blend Modes": {
+          label: "Modes:",
+          text: "Alpha Blend · Additive · Opaque · Premultiplied",
+        },
+        Animation: {
+          label: "Animations:",
+          text: "Idle loop · Walk loop · Walk ping-pong · Walk slice · Walk picked frames",
+        },
+        Camera: {
+          label: "Controls:",
+          text: "Use WASD or arrow keys to pan, Q/E to rotate, mouse wheel or +/- to zoom, and R to reset.",
+        },
+        "Render Texture": {
+          label: "Post FX:",
+          text: "Renders the scene offscreen, then cycles None · Invert · CRT · Pixelate effects.",
+        },
+        Platformer: {
+          label: "Controls:",
+          text: "Use WASD or arrow keys to move. Press W, ArrowUp, or Space to jump.",
+        },
+        "Stress Test": {
+          label: "Info:",
+          text: "Draws 50,000 moving sprites with front-to-back sorting and alpha cutout.",
+        },
+      };
+
+      const DEFAULT_CLEAR_COLOR = { r: 0.06, g: 0.07, b: 0.1, a: 1 };
+
+      const DEMOS: DemoDefinition[] = [
+        basicDemo,
+        customShaderDemo,
+        sortingDemo,
+        blendDemo,
+        animationDemo,
+        cameraDemo,
+        renderTextureDemo,
+        bunnyMarkDemo,
+        platformerDemo,
+        stressDemo,
+      ];
+
+      for (const d of DEMOS) {
+        const opt = document.createElement("option");
+        opt.value = d.label;
+        opt.textContent = d.label;
+        demoSelect.appendChild(opt);
+
+        // const card = document.createElement("div");
+        // card.className = "demo-card";
+        // card.dataset.label = d.label;
+        // card.innerHTML = `<h4>${d.label}</h4><p>${DEMO_DESCRIPTIONS[d.label] || ""}</p>`;
+        // card.addEventListener("click", () => {
+        //   demoSelect.value = d.label;
+        //   demoSelect.dispatchEvent(new Event("change"));
+        // });
+        // demoCards.appendChild(card);
+      }
+
+      const surface = await RenderSurface.create(canvas);
+
+      let current: DemoInstance | null = null;
+      let running = true;
+      let frameId = 0;
+      let elapsed = 0;
+      let startedAt = performance.now();
+      let elapsedBeforeStop = 0;
+      let fpsFrames = 0;
+      let fpsLast = performance.now();
+      let fpsDisplay = 0;
+
+      function elapsedSec() {
+        return (
+          (elapsedBeforeStop + (running ? performance.now() - startedAt : 0)) *
+          0.001
+        );
+      }
+
+      function setRunning(next: boolean) {
+        if (next === running) return;
+        running = next;
+        playStopBtn.textContent = running ? "Stop" : "Play";
+        if (running) {
+          startedAt = performance.now();
+          frameId = requestAnimationFrame(frame);
+        } else {
+          elapsedBeforeStop += performance.now() - startedAt;
+          cancelAnimationFrame(frameId);
+          frameId = 0;
+        }
+      }
+
+      function frame() {
+        elapsed = elapsedSec();
+        fpsFrames++;
+        const now = performance.now();
+        if (now - fpsLast >= 500) {
+          fpsDisplay = Math.round(fpsFrames / ((now - fpsLast) * 0.001));
+          fpsFrames = 0;
+          fpsLast = now;
+          const demoStats = current?.statsText?.();
+          statsEl.textContent = demoStats
+            ? `${fpsDisplay} fps | ${demoStats}`
+            : `${fpsDisplay} fps`;
+        }
+        surface.beginFrame({
+          clearColor: current?.clearColor ?? DEFAULT_CLEAR_COLOR,
+        });
+        current?.frame(elapsed);
+        surface.endFrame();
+        if (running) frameId = requestAnimationFrame(frame);
+      }
+
+      // function updateActiveCard(label: string) {
+      //   demoCards.querySelectorAll(".demo-card").forEach((c) => {
+      //     c.classList.toggle(
+      //       "active",
+      //       (c as HTMLElement).dataset.label === label,
+      //     );
+      //   });
+      // }
+
+      async function loadDemo(def: DemoDefinition) {
+        if (current) {
+          current.destroy();
+          current = null;
+        }
+        const overlay = DEMO_OVERLAYS[def.label];
+        instructionsEl.dataset.label = overlay?.label ?? "Controls:";
+        instructionsEl.textContent = overlay?.text ?? "";
+        instructionsEl.hidden = !overlay;
+        cancelAnimationFrame(frameId);
+        elapsedBeforeStop = 0;
+        startedAt = performance.now();
+        current = await def.setup(surface);
+        canvas.focus({ preventScroll: true });
+        running = true;
+        playStopBtn.textContent = "Stop";
+        frameId = requestAnimationFrame(frame);
+        // updateActiveCard(def.label);
+      }
+
+      demoSelect.addEventListener("change", () => {
+        const def = DEMOS.find((d) => d.label === demoSelect.value);
+        if (def) loadDemo(def);
+      });
+
+      playStopBtn.addEventListener("click", () => setRunning(!running));
+      playStopBtn.disabled = false;
+
+      await loadDemo(DEMOS[0]);
+    }
+
+    initDemos().catch((e) => {
+      console.error(e);
+      const canvas = document.getElementById("canvas");
+      if (canvas) {
+        canvas.insertAdjacentHTML(
+          "afterend",
+          `<p style="color:#f88;font-family:system-ui;padding:1rem;position:absolute;inset:0;display:flex;align-items:center;justify-content:center">Error: ${String(e)}</p>`,
+        );
+      }
+    });
+  </script>
+</StarlightPage>

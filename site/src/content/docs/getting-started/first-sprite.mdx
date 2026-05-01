@@ -1,0 +1,99 @@
+---
+title: Your First Sprite
+description: Draw a textured sprite on screen in under 30 lines of code.
+---
+
+This guide walks through a minimal example that initializes WebGPU, loads a texture, and draws it to the screen every frame.
+
+## Full example
+
+```ts
+import {
+  RenderSurface,
+  SpriteBatch,
+  Texture2D,
+  Color,
+} from 'webgpu-spritebatch'
+
+// 1. Initialize WebGPU
+const canvas = document.querySelector<HTMLCanvasElement>('#canvas')!
+const surface = await RenderSurface.create(canvas)
+
+// 2. Create a SpriteBatch
+const batch = new SpriteBatch(surface, { maxSprites: 10_000 })
+
+// 3. Load a texture
+const tex = await Texture2D.fromUrl(surface, '/hero.png')
+
+// 4. Frame loop
+function frame() {
+  surface.beginFrame({ clearColor: Color.cornflowerBlue })
+
+  batch.begin()
+  batch.draw(tex, {
+    position: [100, 80],
+    scale: 2,
+    origin: [tex.width / 2, tex.height / 2],
+  })
+  batch.end()
+
+  surface.endFrame()
+  requestAnimationFrame(frame)
+}
+
+requestAnimationFrame(frame)
+```
+
+## Step by step
+
+### 1. Create a RenderSurface
+
+`RenderSurface.create()` is an async factory that requests a WebGPU adapter and device, configures the canvas context, and creates a depth texture:
+
+```ts
+const surface = await RenderSurface.create(canvas)
+```
+
+This is the only async setup step. Everything after it is synchronous.
+
+### 2. Create a SpriteBatch
+
+```ts
+const batch = new SpriteBatch(surface, { maxSprites: 10_000 })
+```
+
+`maxSprites` sets the capacity of the instance buffer for a single `begin`/`end` pair. The default is 10,000 — increase it if you need more per batch.
+
+### 3. Load a texture
+
+```ts
+const tex = await Texture2D.fromUrl(surface, '/hero.png')
+```
+
+`Texture2D.fromUrl` fetches an image, creates a `GPUTexture`, and uploads it. You can also use `Texture2D.fromImageSource()` for an existing `ImageBitmap` or `HTMLImageElement`, or `Texture2D.fromColor()` for a solid-color 1x1 texture.
+
+### 4. Draw
+
+```ts
+surface.beginFrame({ clearColor: Color.cornflowerBlue })
+
+batch.begin()
+batch.draw(tex, { position: [100, 80], scale: 2 })
+batch.end()
+
+surface.endFrame()
+```
+
+- `surface.beginFrame()` resizes the canvas if needed, clears the framebuffer, and starts a command encoder.
+- `batch.begin()` opens a draw batch. Set sort mode, blend state, sampler, effect, and camera transform here.
+- `batch.draw()` queues a sprite. Call it as many times as you need.
+- `batch.end()` sorts sprites, uploads instance data, and records draw commands.
+- `surface.endFrame()` submits the GPU command buffer.
+
+You can call `begin`/`end` multiple times per frame for layering (e.g. world sprites, then HUD).
+
+## Next steps
+
+- Learn about [Core Concepts](/guides/core-concepts/) like batching, sort modes, and texture grouping.
+- Add a [Camera](/guides/camera/) for panning and zooming.
+- Try [Custom Shaders](/guides/custom-shaders/) for post-processing effects.

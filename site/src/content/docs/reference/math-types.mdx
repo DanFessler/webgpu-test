@@ -1,0 +1,43 @@
+---
+title: Math & Types
+description: Shared type definitions used across the library.
+---
+
+## Types
+
+```ts
+type Vec2 = [number, number]
+
+interface Rect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+interface ColorRGBA {
+  readonly r: number
+  readonly g: number
+  readonly b: number
+  readonly a: number
+}
+
+type SpriteSortMode = 'deferred' | 'texture' | 'backToFront' | 'frontToBack'
+
+type SpriteFlip = 'none' | 'horizontal' | 'vertical' | 'both'
+
+type AnimationMode = 'loop' | 'once' | 'pingPong'
+```
+
+All of these types are exported from the main package entry point:
+
+```ts
+import type {
+  Vec2,
+  Rect,
+  ColorRGBA,
+  SpriteSortMode,
+  SpriteFlip,
+  AnimationMode,
+} from 'webgpu-spritebatch'
+```

@@ -1,0 +1,45 @@
+---
+title: Introduction
+description: What is webgpu-spritebatch, who it's for, and the philosophy behind it.
+---
+
+**webgpu-spritebatch** is a small, focused TypeScript library for drawing 2D sprites on the web using [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API). If you've ever used `SpriteBatch` in XNA, MonoGame, or FNA, you'll feel right at home.
+
+## The problem it solves
+
+WebGPU is powerful, but using it to draw textured quads requires a lot of setup: pipelines, bind groups, vertex buffers, shaders, and a batching strategy. Full game engines like Pixi or Phaser solve this, but they come with opinions about your scene graph, game loop, and asset pipeline.
+
+**webgpu-spritebatch** fills the gap. It handles:
+
+- Batching sprites into instanced GPU draw calls grouped by texture
+- Sort modes (deferred, texture, front-to-back, back-to-front)
+- Blend modes (alpha, additive, opaque, premultiplied)
+- Sampler modes (linear/point, clamp/wrap)
+- Custom WGSL fragment shaders with typed parameters
+- Render-to-texture for post-processing
+- A 2D camera with pan/zoom/rotate
+- Spritesheet animation sequencing
+
+...and nothing else. You own your game loop, your scene graph (or lack of one), your asset loading, and your architecture.
+
+## Design principles
+
+- **Familiar API** — `begin()` / `draw()` / `end()`, just like XNA.
+- **GPU-first** — instanced rendering, one draw call per texture group.
+- **TypeScript-first** — full type declarations, strong autocomplete, clear option objects.
+- **DPI-aware** — all coordinates use CSS pixels; the canvas renders at native device resolution.
+- **Zero opinions** — no framework, no game loop, no scene graph. Compose it however you want.
+
+## Who is this for?
+
+- Game developers who want SpriteBatch ergonomics on the web.
+- Developers migrating from XNA/MonoGame/FNA to browser-based rendering.
+- Anyone who wants fast 2D sprite rendering without adopting a full engine.
+- Developers who want direct access to the `GPUDevice` for advanced use cases.
+
+## Next steps
+
+- [Install the package](/getting-started/installation/) and draw your first sprite.
+- Explore [Core Concepts](/guides/core-concepts/) to understand how batching works.
+- Browse the [API Reference](/reference/sprite-batch/) for detailed signatures.
+- Try the [Live Demos](/demos/) to see the library in action.

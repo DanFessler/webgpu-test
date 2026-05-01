@@ -1,0 +1,50 @@
+---
+title: Texture2D
+description: API reference for the Texture2D class.
+---
+
+Wrapper around a `GPUTexture` with convenient factory methods.
+
+## Factory methods
+
+### `static fromUrl(surface, url)`
+
+Load a texture from a URL (async).
+
+```ts
+const tex = await Texture2D.fromUrl(surface, '/sprites/hero.png')
+```
+
+### `static fromImageSource(surface, source)`
+
+From an `HTMLImageElement`, `ImageBitmap`, `HTMLCanvasElement`, or `OffscreenCanvas`.
+
+```ts
+const tex = Texture2D.fromImageSource(surface, myImageBitmap)
+```
+
+### `static fromColor(surface, r, g, b, a?)`
+
+Create a 1x1 solid-color texture.
+
+```ts
+const white = Texture2D.fromColor(surface, 1, 1, 1)
+```
+
+## Members
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `width` | `number` | Texture width in pixels |
+| `height` | `number` | Texture height in pixels |
+| `view` | `GPUTextureView` | The GPU texture view |
+
+## Methods
+
+### `destroy()`
+
+Release the GPU texture.
+
+```ts
+tex.destroy()
+```

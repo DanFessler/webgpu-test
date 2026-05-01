@@ -1,0 +1,68 @@
+---
+title: Core Concepts
+description: How SpriteBatch batches, sorts, and renders sprites.
+---
+
+## The begin / draw / end cycle
+
+Every frame, you call `begin()`, then `draw()` one or more sprites, then `end()`:
+
+```ts
+batch.begin({ sortMode: 'texture' })
+batch.draw(texA, { position: [10, 10] })
+batch.draw(texB, { position: [50, 50] })
+batch.draw(texA, { position: [90, 10] })
+batch.end()
+```
+
+During `begin()`, you configure the batch: sort mode, blend state, sampler, shader effect, camera transform, and render target. During `draw()`, sprites are buffered in CPU memory. During `end()`, the library sorts sprites (if needed), uploads instance data to the GPU, and issues instanced draw calls grouped by texture.
+
+## Texture grouping
+
+Sprites that share the same texture are rendered in a single instanced draw call. This is the key to performance: instead of one draw call per sprite, you get one draw call per unique texture per batch.
+
+When `sortMode` is `'texture'`, the library explicitly groups sprites by texture to minimize bind group switches, even if they were drawn in a different order.
+
+## Sort modes
+
+| Mode | Behavior |
+|------|----------|
+| `'deferred'` | Draw order preserved. No sorting overhead — fastest option. |
+| `'texture'` | Grouped by texture ID to minimize bind group switches. |
+| `'frontToBack'` | Ascending `layerDepth`. Ideal with `alphaCutout` effect for depth-based overdraw reduction. |
+| `'backToFront'` | Descending `layerDepth`. Classic painter's algorithm for correct transparency. |
+
+## Multiple batches per frame
+
+Call `begin`/`end` multiple times per frame for layering:
+
+```ts
+// World layer with camera
+batch.begin({ transformMatrix: cam.getTransformMatrix() })
+// ...draw world sprites...
+batch.end()
+
+// HUD layer without camera
+batch.begin()
+// ...draw UI sprites...
+batch.end()
+```
+
+Each batch is independent: it can have different sort modes, blend states, effects, and render targets.
+
+## Origin convention
+
+Origin values are in **source-texture pixel space**, matching the XNA convention. An origin of `[tex.width/2, tex.height/2]` centers the sprite on its position regardless of scale:
+
+```ts
+batch.draw(tex, {
+  position: [screenCenterX, screenCenterY],
+  origin: [tex.width / 2, tex.height / 2],
+  scale: 3,
+  rotation: Math.PI / 4,
+})
+```
+
+## Layer depth
+
+The `layerDepth` field (0–1) is used by front-to-back and back-to-front sort modes. It also writes to the depth buffer when using effects with depth testing (`alphaCutout`).

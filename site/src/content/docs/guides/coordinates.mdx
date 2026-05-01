@@ -1,0 +1,39 @@
+---
+title: Coordinates & DPI
+description: How the library handles CSS pixels, device pixels, and Retina displays.
+---
+
+## CSS pixels everywhere
+
+All positions, sizes, and dimensions in the API use **CSS pixels** (logical pixels). On a 2x Retina display, a sprite drawn at `[100, 50]` with scale `1` appears at the same screen location and visual size as on a 1x display.
+
+The canvas automatically renders at native device resolution for crisp output.
+
+## Surface dimensions
+
+| Property | Returns |
+|----------|---------|
+| `surface.width` / `surface.height` | CSS pixel dimensions (use these for layout) |
+| `surface.physicalWidth` / `surface.physicalHeight` | Actual framebuffer pixels |
+| `surface.dpr` | Device pixel ratio |
+
+Use `surface.width` and `surface.height` for positioning and layout. The physical dimensions are exposed for advanced use cases but are rarely needed directly.
+
+## Virtual resolution for pixel art
+
+For a pixel-art game with a fixed design resolution (e.g. 320x180), use `Camera2D` with zoom:
+
+```ts
+const cam = new Camera2D()
+cam.zoom = surface.width / 320
+cam.origin = [surface.width / 2, surface.height / 2]
+```
+
+All your game logic then works in 320x180 virtual coordinates. The camera zoom scales everything up to the actual screen size, and `SamplerState.pointClamp` keeps pixels sharp:
+
+```ts
+batch.begin({
+  transformMatrix: cam.getTransformMatrix(),
+  samplerState: SamplerState.pointClamp,
+})
+```
