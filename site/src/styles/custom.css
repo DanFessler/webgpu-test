@@ -41,6 +41,10 @@
   margin-top: 0 !important;
 }
 
+.home-page {
+  margin: 0;
+}
+
 /* Make the fixed nav header transparent on hero/splash pages */
 [data-has-hero] .page > .header {
   background-color: transparent !important;
@@ -54,8 +58,12 @@
 
 /* Homepage hero overrides */
 .hero-section {
-  --hero-code-number: #ffcf66;
   position: relative;
+  display: flex;
+  min-height: min(760px, 100svh);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   padding: calc(var(--sl-nav-height, 3.5rem) + 3rem) 2rem 4rem;
   text-align: center;
@@ -230,7 +238,51 @@
   font-size: 0.9rem;
 }
 
-/* Code sample in hero */
+/* Code sample section */
+.code-showcase {
+  --hero-code-number: #ffcf66;
+  padding: 4.5rem 2rem;
+  border-bottom: 1px solid var(--sl-color-hairline-light);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(var(--brand-accent-rgb), 0.07),
+      transparent 42%
+    ),
+    var(--sl-color-bg);
+  text-align: center;
+}
+
+.section-eyebrow {
+  width: max-content;
+  margin: 0 auto 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(var(--brand-accent-rgb), 0.12);
+  color: var(--sl-color-accent-high);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.code-showcase h2 {
+  max-width: 42rem;
+  margin: 0 auto 1rem;
+  color: var(--sl-color-white);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.code-showcase > p {
+  max-width: 42rem;
+  margin: 0 auto 2rem;
+  color: var(--sl-color-gray-2);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
 .hero-code {
   max-width: 40rem;
   margin: 0 auto;
