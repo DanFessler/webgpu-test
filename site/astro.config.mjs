@@ -40,12 +40,15 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: 'webgpu-spritebatch',
+      title: 'SpriteBatch',
       description:
         'XNA-inspired SpriteBatch for WebGPU — draw thousands of textured, tinted, rotated sprites with a familiar begin / draw / end workflow.',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/DanFessler/webgpu-spritebatch' },
       ],
+      components: {
+        Header: './src/components/Header.astro',
+      },
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         {

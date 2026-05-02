@@ -283,6 +283,19 @@
   line-height: 1.7;
 }
 
+.code-docs-link {
+  display: inline-flex;
+  margin-top: 1.5rem;
+  color: var(--sl-color-accent-high);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.code-docs-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .hero-code {
   max-width: 40rem;
   margin: 0 auto;
